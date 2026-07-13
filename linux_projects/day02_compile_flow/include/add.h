@@ -1,0 +1,7 @@
+#ifndef ADD_H
+#define ADD_H
+
+int add(int left, int right);
+int sub(int left, int right);
+
+#endif

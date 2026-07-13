@@ -1,0 +1,30 @@
+# 编译产物
+*.o
+*.out
+*.bin
+*.exe
+*.so
+*.a
+*.i
+*.s
+
+# 可执行文件（Linux 无后缀）
+build/
+*/build/
+
+# 特定编译产物
+linux_projects/day01_hello_linux/hello
+linux_projects/day01_hello_linux/hello_linux
+
+# CMake 生成文件
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+build/Makefile
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
