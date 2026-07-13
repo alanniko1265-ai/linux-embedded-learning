@@ -60,7 +60,7 @@ debug_demo: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically
 
 ```
 
-我对 `with debug_info` 的理解：
+我对 `with debug_info` 的理解：with debug_info 表示可执行文件中包含调试信息。gdb 可以根据这些信息显示源码行号、函数名和变量名。如果没有 -g，gdb 可能只能看到地址或汇编，调试会困难很多。
 
 ## 正常运行
 
@@ -93,7 +93,7 @@ voltage: 24
 Segmentation fault (core dumped)
 ```
 
-我对 segmentation fault 的理解：输入不合法，有空指针
+我对 segmentation fault 的理解：表示程序访问了不该访问的内存。本例中 crash_by_null_pointer 创建了 NULL 指针 status，并传给 print_device_status，函数内部访问 status->id 时发生空指针解引用，所以崩溃。
 
 ## gdb 定位崩溃
 
@@ -142,14 +142,14 @@ break main
 break run_normal_demo
 break calculate_average
 run normal
-next
-step
 print argc
 print argv[1]
+next
+next
 continue
 ```
 
-我的观察：可以观察到argc和argv[1]的值
+我的观察：argc = 2，argv[1] = "normal"。如果程序没有先停在 main，或者已经运行结束，就无法 print argc/argv。调试时必须先 break main，再 run normal，让程序停在 main 的作用域里,在 strcmp、printf 这类库函数上不要随便使用 step，否则会进入库函数内部甚至汇编代码。一般用 next 跳过库函数；遇到自己写的函数时再用 step。。
 
 ## 逻辑错误调试
 
@@ -171,7 +171,7 @@ print sum
 print count
 ```
 
-我发现的问题：
+我发现的问题：在 calculate_average_buggy 中，count = 4，数组 values 有 4 个元素，合法下标是 0、1、2、3。但循环条件写成 i <= count，导致 i = 4 时访问 values[4]，发生数组越界。这个错误不一定导致程序崩溃，但会读到不属于数组的数据，导致结果不可靠。正确写法应该是 i < count。
 
 ## 今日概念
 
@@ -181,7 +181,7 @@ print count
 
 ### gdb
 
-记录：debug使用
+记录：Linux 下常用的命令行调试器，可以设置断点、单步执行、查看变量、查看调用栈，用来定位崩溃和逻辑错误。
 
 ### break
 
@@ -193,11 +193,11 @@ print count
 
 ### next
 
-记录：下一步的实行
+记录：执行下一行，不进入函数内部，适合跳过 printf、strcmp 等库函数。
 
 ### step
 
-记录：进入下一步涉及的函数中
+记录：执行下一行，如果遇到函数调用会进入函数内部，适合进入自己写的函数。
 
 ### print
 
@@ -205,7 +205,7 @@ print count
 
 ### backtrace
 
-记录：错误发生的调用记录
+记录：查看函数调用栈，能看出程序是沿着哪些函数调用走到崩溃位置的
 
 ### segmentation fault
 
