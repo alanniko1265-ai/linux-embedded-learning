@@ -12,7 +12,8 @@ linux-embedded-learning/
 │   ├── day03.md                         # Makefile 入门
 │   ├── day04.md                         # CMake 入门
 │   ├── day05.md                         # gdb 调试
-│   └── day06.md                         # 静态库和动态库
+│   ├── day06.md                         # 静态库和动态库
+│   └── day07.md                         # Week 1 复盘：Linux 工具箱 v1
 │
 ├── linux_projects/                      # Linux C/C++ 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -20,7 +21,8 @@ linux-embedded-learning/
 │   ├── day03_makefile_basic/            # Makefile 编写练习
 │   ├── day04_cmake_basic/               # CMake 构建练习
 │   ├── day05_gdb_debug/                 # GDB 断点/单步/内存调试
-│   └── day06_static_shared_lib/         # 静态库 (.a) 与动态库 (.so)
+│   ├── day06_static_shared_lib/         # 静态库 (.a) 与动态库 (.so)
+│   └── day07_linux_toolbox_v1/          # Week 1 复盘 — 多文件 C 命令行工具
 │
 ├── linux-learning-notes/                # 学习笔记整理版（day01-03）
 │   ├── notes/
@@ -50,6 +52,7 @@ linux-embedded-learning/
 | 04 | CMake 入门（CMakeLists.txt、out-of-source build） | 2026-07-13 |
 | 05 | GDB 调试（断点、单步、watch、core dump） | 2026-07-13 |
 | 06 | 静态库 (.a) 与动态库 (.so)、ar、ldd、LD_LIBRARY_PATH | 2026-07-14 |
+| 07 | Week 1 复盘 — Linux 工具箱 v1（多文件 + Makefile + CLI 参数） | 2026-07-14 |
 
 ### Qt 工控 HMI 路线
 
