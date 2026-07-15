@@ -14,7 +14,8 @@ linux-embedded-learning/
 │   ├── day05.md                         # gdb 调试
 │   ├── day06.md                         # 静态库和动态库
 │   ├── day07.md                         # Week 1 复盘：Linux 工具箱 v1
-│   └── day08.md                         # 文件 IO 基础：open/read/write/close
+│   ├── day08.md                         # 文件 IO 基础：open/read/write/close
+│   └── day09.md                         # 从零实现安全文件复制（write_all 封装）
 │
 └── linux_projects/                      # Linux C/C++ 练习项目
     ├── day01_hello_linux/               # Hello World — 环境验证
@@ -24,7 +25,8 @@ linux-embedded-learning/
     ├── day05_gdb_debug/                 # GDB 断点/单步/内存调试
     ├── day06_static_shared_lib/         # 静态库 (.a) 与动态库 (.so)
     ├── day07_linux_toolbox_v1/          # Week 1 复盘 — 多文件 C 命令行工具
-    └── day08_file_io/                   # 文件 IO — my_cat / my_cp 系统调用练习
+    ├── day08_file_io/                   # 文件 IO — my_cat / my_cp 系统调用练习
+    └── day09_file_io_utils/            # 文件 IO — safe_cp / write_all 封装
 ```
 
 ## 🗓️ 学习路线
@@ -39,6 +41,7 @@ linux-embedded-learning/
 | 06 | 静态库 (.a) 与动态库 (.so)、ar、ldd、LD_LIBRARY_PATH | 2026-07-14 |
 | 07 | Week 1 复盘 — Linux 工具箱 v1（多文件 + Makefile + CLI 参数） | 2026-07-14 |
 | 08 | 文件 IO 基础 — open/read/write/close、my_cat、my_cp | 2026-07-15 |
+| 09 | 文件 IO — 从零实现 write_all 安全写入、safe_cp | 2026-07-15 |
 
 ## 🔧 环境
 
