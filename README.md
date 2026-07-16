@@ -16,7 +16,8 @@ linux-embedded-learning/
 │   ├── day07.md                         # Week 1 复盘：Linux 工具箱 v1
 │   ├── day08.md                         # 文件 IO 基础：open/read/write/close
 │   ├── day09.md                         # 从零实现安全文件复制（write_all 封装）
-│   └── day10.md                         # 文件属性：stat、权限位、类型识别
+│   ├── day10.md                         # 文件属性：stat、权限位、类型识别
+│   └── day11.md                         # 目录遍历：opendir/readdir/closedir + stat
 │
 ├── linux_projects/                      # Linux C/C++ 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -28,11 +29,12 @@ linux-embedded-learning/
 │   ├── day07_linux_toolbox_v1/          # Week 1 复盘 — 多文件 C 命令行工具
 │   ├── day08_file_io/                   # 文件 IO — my_cat / my_cp 系统调用练习
 │   ├── day09_file_io_utils/             # 文件 IO — safe_cp / write_all 封装
-│   └── day10_file_stat/                 # 文件属性 — stat、类型识别、权限解析
+│   ├── day10_file_stat/                 # 文件属性 — stat、类型识别、权限解析
+│   └── day11_dir_scan/                  # 目录遍历 — opendir/readdir/closedir
 │
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
-│   ├── notes/                           # 笔记副本（day01~day10）
-│   └── projects/                        # 项目副本（day01~day10）
+│   ├── notes/                           # 笔记副本（day01~day11）
+│   └── projects/                        # 项目副本（day01~day11）
 │
 ├── qt_projects/                         # Qt 嵌入式 HMI 项目（Day 4+ 并行轨道）
 ├── Linux_Embedded_App_Summer_Plan.md    # 暑期学习总体计划
@@ -54,6 +56,7 @@ linux-embedded-learning/
 | 08 | 文件 IO 基础 — open/read/write/close、my_cat、my_cp | 2026-07-15 |
 | 09 | 文件 IO — 从零实现 write_all 安全写入、safe_cp | 2026-07-15 |
 | 10 | 文件属性 — stat、文件类型识别、权限位解析、ls -l mode 输出 | 2026-07-16 |
+| 11 | 目录遍历 — opendir/readdir/closedir、过滤 . 和 ..、结合 stat | 2026-07-16 |
 
 ## 🔧 环境
 
@@ -75,6 +78,11 @@ make
 cd linux_projects/day10_file_stat
 make
 ./build/file_probe /home
+
+# 以 day11 目录遍历为例
+cd linux_projects/day11_dir_scan
+make
+./build/dir_scan ./data
 ```
 
 ---

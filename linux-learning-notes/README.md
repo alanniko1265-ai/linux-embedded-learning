@@ -16,7 +16,8 @@ linux-learning-notes/
 │   ├── day07_linux_toolbox_v1/  # Week 1 复盘：Linux 工具箱 v1
 │   ├── day08_file_io/           # 文件 IO 基础：my_cat / my_cp
 │   ├── day09_file_io_utils/     # 文件 IO：safe_cp / write_all 封装
-│   └── day10_file_stat/         # 文件属性：stat、权限、类型识别
+│   ├── day10_file_stat/         # 文件属性：stat、权限、类型识别
+│   └── day11_dir_scan/          # 目录遍历：opendir/readdir/closedir
 └── notes/                       # 学习笔记
     ├── day01.md                 # Linux 基础入门笔记
     ├── day02.md                 # 编译流程笔记
@@ -27,7 +28,8 @@ linux-learning-notes/
     ├── day07.md                 # Week 1 复盘笔记
     ├── day08.md                 # 文件 IO 基础笔记
     ├── day09.md                 # 文件 IO 安全封装笔记
-    └── day10.md                 # 文件属性与目录识别笔记
+    ├── day10.md                 # 文件属性与目录识别笔记
+    └── day11.md                 # 目录遍历笔记
 ```
 
 ## 学习进度
@@ -44,3 +46,4 @@ linux-learning-notes/
 | Day 08 | 文件 IO | open/read/write/close 系统调用，my_cat/my_cp |
 | Day 09 | 文件 IO 进阶 | write_all 安全封装，safe_cp 实现 |
 | Day 10 | 文件属性 | stat、文件类型识别、权限位解析、ls -l mode 输出 |
+| Day 11 | 目录遍历 | opendir/readdir/closedir、. 和 .. 过滤、结合 stat |
