@@ -77,7 +77,7 @@ make
 make: Nothing to be done for 'all'.
 ```
 
-为什么第二次可能没有重新编译：
+为什么第二次可能没有重新编译：make 会根据目标文件和依赖文件的修改时间判断是否需要重新编译。如果源文件没有变化，而 build/calc_tool 已经是最新的，就不会重复执行编译命令。
 
 ### 修改 main.c 后重新 make
 
@@ -91,7 +91,6 @@ make: Nothing to be done for 'all'.
 再次执行：
 
 ```bash
-make clean
 make
 make run
 ```
@@ -99,8 +98,6 @@ make run
 输出：
 
 ```text
-rm -rf build
-mkdir -p build
 gcc -Wall -g -O0 -Iinclude -c src/main.c -o build/main.o
 gcc -Wall -g -O0 -Iinclude -c src/calc.c -o build/calc.o
 gcc build/main.o build/calc.o -o build/calc_tool
@@ -113,7 +110,7 @@ calc tool
 
 ```
 
-这次重新编译了哪些文件：
+这次重新编译了哪些文件：只重新编译了 src/main.c，生成 build/main.o；然后重新链接 build/calc_tool。src/calc.c 没有修改，所以 build/calc.o 没有重新生成。
 
 ### clean
 
@@ -128,7 +125,7 @@ rm -rf build
 
 ```
 
-clean 做了什么：将.o文件和生成的app都删除
+clean 做了什么：删除 build 目录，也就是删除 .o 目标文件和最终可执行程序，但不会删除 src、include、Makefile 等源文件。
 
 ## 今日概念
 
@@ -146,7 +143,7 @@ clean 做了什么：将.o文件和生成的app都删除
 
 ### 增量编译
 
-记录：make 会根据文件修改时间判断哪些文件需要重新编译。只改 main.c 时，只重新O编译 main.o，再重新链接最终程序。
+记录：make 会根据文件修改时间判断哪些文件需要重新编译。只改 main.c 时，只重新编译 main.o，再重新链接最终程序。
 
 ### .PHONY
 
@@ -154,11 +151,11 @@ clean 做了什么：将.o文件和生成的app都删除
 
 ### $@
 
-记录：build/main.o
+记录：build/main.o记录：$@ 表示当前规则的目标。比如在 build/main.o: src/main.c 这条规则中，$@ 就是 build/main.o。
 
 ### $<
 
-记录：src/main.c
+记录：记录：$< 表示当前规则的第一个依赖。比如在 build/main.o: src/main.c 这条规则中，$< 就是 src/main.c。
 
 ## 今日总结
 

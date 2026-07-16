@@ -1,0 +1,3 @@
+hello linux file io
+this file is read by open/read/write/close
+day08 starts system programming

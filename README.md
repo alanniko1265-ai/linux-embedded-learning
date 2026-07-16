@@ -15,18 +15,29 @@ linux-embedded-learning/
 │   ├── day06.md                         # 静态库和动态库
 │   ├── day07.md                         # Week 1 复盘：Linux 工具箱 v1
 │   ├── day08.md                         # 文件 IO 基础：open/read/write/close
-│   └── day09.md                         # 从零实现安全文件复制（write_all 封装）
+│   ├── day09.md                         # 从零实现安全文件复制（write_all 封装）
+│   └── day10.md                         # 文件属性：stat、权限位、类型识别
 │
-└── linux_projects/                      # Linux C/C++ 练习项目
-    ├── day01_hello_linux/               # Hello World — 环境验证
-    ├── day02_compile_flow/              # 多文件编译流程
-    ├── day03_makefile_basic/            # Makefile 编写练习
-    ├── day04_cmake_basic/               # CMake 构建练习
-    ├── day05_gdb_debug/                 # GDB 断点/单步/内存调试
-    ├── day06_static_shared_lib/         # 静态库 (.a) 与动态库 (.so)
-    ├── day07_linux_toolbox_v1/          # Week 1 复盘 — 多文件 C 命令行工具
-    ├── day08_file_io/                   # 文件 IO — my_cat / my_cp 系统调用练习
-    └── day09_file_io_utils/            # 文件 IO — safe_cp / write_all 封装
+├── linux_projects/                      # Linux C/C++ 练习项目
+│   ├── day01_hello_linux/               # Hello World — 环境验证
+│   ├── day02_compile_flow/              # 多文件编译流程
+│   ├── day03_makefile_basic/            # Makefile 编写练习
+│   ├── day04_cmake_basic/               # CMake 构建练习
+│   ├── day05_gdb_debug/                 # GDB 断点/单步/内存调试
+│   ├── day06_static_shared_lib/         # 静态库 (.a) 与动态库 (.so)
+│   ├── day07_linux_toolbox_v1/          # Week 1 复盘 — 多文件 C 命令行工具
+│   ├── day08_file_io/                   # 文件 IO — my_cat / my_cp 系统调用练习
+│   ├── day09_file_io_utils/             # 文件 IO — safe_cp / write_all 封装
+│   └── day10_file_stat/                 # 文件属性 — stat、类型识别、权限解析
+│
+├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
+│   ├── notes/                           # 笔记副本（day01~day10）
+│   └── projects/                        # 项目副本（day01~day10）
+│
+├── qt_projects/                         # Qt 嵌入式 HMI 项目（Day 4+ 并行轨道）
+├── Linux_Embedded_App_Summer_Plan.md    # 暑期学习总体计划
+├── Qt_Linux_HMI_Plan_From_Day4.md       # Qt/Linux HMI 专项路线
+└── .gitignore
 ```
 
 ## 🗓️ 学习路线
@@ -42,6 +53,7 @@ linux-embedded-learning/
 | 07 | Week 1 复盘 — Linux 工具箱 v1（多文件 + Makefile + CLI 参数） | 2026-07-14 |
 | 08 | 文件 IO 基础 — open/read/write/close、my_cat、my_cp | 2026-07-15 |
 | 09 | 文件 IO — 从零实现 write_all 安全写入、safe_cp | 2026-07-15 |
+| 10 | 文件属性 — stat、文件类型识别、权限位解析、ls -l mode 输出 | 2026-07-16 |
 
 ## 🔧 环境
 
@@ -58,6 +70,11 @@ cd linux_projects/day08_file_io
 make
 ./build/my_cat data/input.txt
 ./build/my_cp data/input.txt data/output.txt
+
+# 以 day10 文件属性为例
+cd linux_projects/day10_file_stat
+make
+./build/file_probe /home
 ```
 
 ---

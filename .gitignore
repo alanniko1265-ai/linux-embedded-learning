@@ -28,3 +28,7 @@ build/Makefile
 *.swp
 *.swo
 *~
+
+# linux-learning-notes 镜像 — 同样忽略编译产物
+linux-learning-notes/projects/*/build/
+linux-learning-notes/projects/*/hello*
