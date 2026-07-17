@@ -34,7 +34,6 @@ linux-embedded-learning/
 │   ├── day11_dir_scan/                  # 目录遍历 — opendir/readdir/closedir
 │   └── day12_process_runner/            # 进程基础 — fork + execvp + waitpid
 │
-├── shiguang-study-flow/                 # 拾光 Study Flow — 本地学习计时与统计工具
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
 │   ├── notes/                           # 笔记副本（day01~day12）
 │   └── projects/                        # 项目副本（day01~day12）
