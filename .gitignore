@@ -22,6 +22,10 @@ CMakeFiles/
 cmake_install.cmake
 build/Makefile
 
+# 本地仓库克隆
+linux-embedded-learning/
+temp_repo/
+
 # 编辑器
 .vscode/
 .idea/
