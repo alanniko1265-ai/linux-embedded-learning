@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 两周时间，覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理与模块化设计。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO 与模块化设计。
 
 ---
 
@@ -27,7 +27,7 @@
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 模块化日志系统。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统。
 
 ---
 
@@ -50,7 +50,8 @@ linux-embedded-learning/
 │   ├── day11.md                         # 目录遍历：opendir/readdir/closedir + stat
 │   ├── day12.md                         # 进程基础：fork + execvp + waitpid
 │   ├── day13.md                         # 信号处理：sigaction、SIGINT、优雅退出
-│   └── day14.md                         # 日志模块：时间戳、分级日志、模块封装
+│   ├── day14.md                         # 日志模块：时间戳、分级日志、模块封装
+│   └── day15.md                         # 非阻塞 IO：fcntl、O_NONBLOCK、EAGAIN
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -67,10 +68,11 @@ linux-embedded-learning/
 │   ├── day12_process_runner/            # 进程管理 — fork + execvp + waitpid
 │   ├── day13_signal_guard/              # 信号处理 — SIGINT 捕获与优雅关闭
 │   └── day14_logger_module/             # 日志模块 — 多文件 C 项目 + 时间戳日志
+│   └── day15_nonblock_io/               # 非阻塞 IO — fcntl + O_NONBLOCK + EAGAIN
 │
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
-│   ├── notes/                           # 笔记副本（day01~day14）
-│   └── projects/                        # 项目副本（day01~day14）
+│   ├── notes/                           # 笔记副本（day01~day15）
+│   └── projects/                        # 项目副本（day01~day15）
 │
 ├── qt_projects/                         # Qt 嵌入式 HMI 项目（Day 4+ 并行轨道）
 ├── Linux_Embedded_App_Summer_Plan.md    # 暑期学习总体计划
@@ -82,7 +84,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 全 14 天总览
+### 📅 全 15 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -100,6 +102,7 @@ linux-embedded-learning/
 | 12 | 进程管理 | 07-17 | `fork`, `execvp`, `waitpid`, `WIFEXITED`, `WEXITSTATUS` |
 | 13 | 信号处理 | 07-17 | `sigaction`, `SIGINT`, `sig_atomic_t`, 优雅退出 |
 | 14 | 日志模块 | 07-18 | `fopen`, `fprintf`, `strftime`, 多文件模块封装 |
+| 15 | 非阻塞 IO | 07-18 | `fcntl`, `F_GETFL`/`F_SETFL`, `O_NONBLOCK`, `EAGAIN` |
 
 ---
 
@@ -130,6 +133,7 @@ linux-embedded-learning/
 | 12 | `process_runner` | `proc_runner`（fork 子进程执行任意命令，报告退出码） |
 | 13 | `signal_guard` | `signal_guard`（捕获 Ctrl+C，信号驱动优雅关闭+日志） |
 | 14 | `logger_module` | `logger_demo`（多文件模块：init → info/warn/error → close） |
+| 15 | `nonblock_io` | `nonblock_demo`（fcntl 设置 stdin 非阻塞，处理 EAGAIN） |
 
 ---
 
@@ -208,6 +212,10 @@ make && ./build/signal_guard
 cd linux_projects/day14_logger_module
 make && ./build/logger_demo
 cat logs/app.log   # 查看带时间戳的分级日志
+
+# Day 15 — 非阻塞 IO（stdin 不卡住，输入 quit 退出）
+cd linux_projects/day15_nonblock_io
+make && ./build/nonblock_demo
 ```
 
 ---
