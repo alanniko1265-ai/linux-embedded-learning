@@ -17,7 +17,13 @@ linux-learning-notes/
 │   ├── day08_file_io/           # 文件 IO 基础：my_cat / my_cp
 │   ├── day09_file_io_utils/     # 文件 IO：safe_cp / write_all 封装
 │   ├── day10_file_stat/         # 文件属性：stat、权限、类型识别
-│   └── day11_dir_scan/          # 目录遍历：opendir/readdir/closedir
+│   ├── day11_dir_scan/          # 目录遍历：opendir/readdir/closedir
+│   ├── day12_process_runner/    # 进程管理：fork + execvp + waitpid
+│   ├── day13_signal_guard/      # 信号处理：sigaction、SIGINT、优雅退出
+│   ├── day14_logger_module/     # 日志模块：时间戳、分级日志、模块封装
+│   ├── day15_nonblock_io/       # 非阻塞 IO：fcntl + O_NONBLOCK + EAGAIN
+│   ├── day16_proc_sys_dev/      # 虚拟文件系统：/proc、/dev/null、/dev/zero
+│   └── day17_ioctl_mmap_intro/  # ioctl 终端查询 + mmap 文件映射
 └── notes/                       # 学习笔记
     ├── day01.md                 # Linux 基础入门笔记
     ├── day02.md                 # 编译流程笔记
@@ -29,7 +35,13 @@ linux-learning-notes/
     ├── day08.md                 # 文件 IO 基础笔记
     ├── day09.md                 # 文件 IO 安全封装笔记
     ├── day10.md                 # 文件属性与目录识别笔记
-    └── day11.md                 # 目录遍历笔记
+    ├── day11.md                 # 目录遍历笔记
+    ├── day12.md                 # 进程管理笔记
+    ├── day13.md                 # 信号处理笔记
+    ├── day14.md                 # 日志模块笔记
+    ├── day15.md                 # 非阻塞 IO 笔记
+    ├── day16.md                 # /proc、/sys、/dev 笔记
+    └── day17.md                 # ioctl 与 mmap 入门笔记
 ```
 
 ## 学习进度
@@ -47,3 +59,17 @@ linux-learning-notes/
 | Day 09 | 文件 IO 进阶 | write_all 安全封装，safe_cp 实现 |
 | Day 10 | 文件属性 | stat、文件类型识别、权限位解析、ls -l mode 输出 |
 | Day 11 | 目录遍历 | opendir/readdir/closedir、. 和 .. 过滤、结合 stat |
+| Day 12 | 进程管理 | fork + execvp + waitpid、子进程执行命令 |
+| Day 13 | 信号处理 | sigaction、SIGINT 捕获、优雅关闭 |
+| Day 14 | 日志模块 | fopen/fprintf/strftime、分级日志、模块封装 |
+| Day 15 | 非阻塞 IO | fcntl、O_NONBLOCK、EAGAIN 处理 |
+| Day 16 | 虚拟文件系统 | /proc/cpuinfo、/proc/meminfo、/dev/null、/dev/zero |
+| Day 17 | ioctl 与 mmap | ioctl(TIOCGWINSZ) 终端查询、mmap 文件映射 |
+
+## 环境要求
+
+- **gcc**：C 编译器（推荐 9+）
+- **GNU Make**：构建自动化
+- **Linux / WSL**：运行环境（Ubuntu 20.04+ / WSL2）
+
+所有项目使用 C11 标准，编译选项 `-Wall -g -O0`，Makefile 提供 `all`、`run`、`clean` 三个标准目标。
