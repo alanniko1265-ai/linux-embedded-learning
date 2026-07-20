@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO 与模块化设计。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、模块化设计、/proc /sys /dev 虚拟文件系统。
 
 ---
 
@@ -11,6 +11,7 @@
 - [学习路线](#学习路线)
 - [Week 1：编译工具链](#week-1编译工具链)
 - [Week 2：系统编程](#week-2系统编程)
+- [Week 3：虚拟文件系统与设备文件](#week-3虚拟文件系统与设备文件)
 - [环境要求](#环境要求)
 - [快速开始](#快速开始)
 - [并行学习轨道](#并行学习轨道)
@@ -20,14 +21,14 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的两周 Linux 嵌入式 C 编程自学过程。每天包含：
+本仓库记录了从 **2026-07-08** 开始的三周 Linux 嵌入式 C 编程自学过程。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → /proc /sys /dev 虚拟文件系统。
 
 ---
 
@@ -51,7 +52,8 @@ linux-embedded-learning/
 │   ├── day12.md                         # 进程基础：fork + execvp + waitpid
 │   ├── day13.md                         # 信号处理：sigaction、SIGINT、优雅退出
 │   ├── day14.md                         # 日志模块：时间戳、分级日志、模块封装
-│   └── day15.md                         # 非阻塞 IO：fcntl、O_NONBLOCK、EAGAIN
+│   ├── day15.md                         # 非阻塞 IO：fcntl、O_NONBLOCK、EAGAIN
+│   └── day16.md                         # /proc、/sys、/dev：虚拟文件系统与设备文件
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -67,12 +69,13 @@ linux-embedded-learning/
 │   ├── day11_dir_scan/                  # 目录遍历 — opendir/readdir/closedir
 │   ├── day12_process_runner/            # 进程管理 — fork + execvp + waitpid
 │   ├── day13_signal_guard/              # 信号处理 — SIGINT 捕获与优雅关闭
-│   └── day14_logger_module/             # 日志模块 — 多文件 C 项目 + 时间戳日志
-│   └── day15_nonblock_io/               # 非阻塞 IO — fcntl + O_NONBLOCK + EAGAIN
+│   ├── day14_logger_module/             # 日志模块 — 多文件 C 项目 + 时间戳日志
+│   ├── day15_nonblock_io/               # 非阻塞 IO — fcntl + O_NONBLOCK + EAGAIN
+│   └── day16_proc_sys_dev/              # /proc /sys /dev — 虚拟文件系统与设备文件
 │
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
-│   ├── notes/                           # 笔记副本（day01~day15）
-│   └── projects/                        # 项目副本（day01~day15）
+│   ├── notes/                           # 笔记副本（day01~day16）
+│   └── projects/                        # 项目副本（day01~day16）
 │
 ├── qt_projects/                         # Qt 嵌入式 HMI 项目（Day 4+ 并行轨道）
 ├── Linux_Embedded_App_Summer_Plan.md    # 暑期学习总体计划
@@ -84,7 +87,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 全 15 天总览
+### 📅 全 16 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -103,6 +106,7 @@ linux-embedded-learning/
 | 13 | 信号处理 | 07-17 | `sigaction`, `SIGINT`, `sig_atomic_t`, 优雅退出 |
 | 14 | 日志模块 | 07-18 | `fopen`, `fprintf`, `strftime`, 多文件模块封装 |
 | 15 | 非阻塞 IO | 07-18 | `fcntl`, `F_GETFL`/`F_SETFL`, `O_NONBLOCK`, `EAGAIN` |
+| 16 | /proc /sys /dev | 07-20 | `fopen("/proc/...")`, `/dev/null`, `/dev/zero`, 虚拟文件系统 |
 
 ---
 
@@ -134,6 +138,14 @@ linux-embedded-learning/
 | 13 | `signal_guard` | `signal_guard`（捕获 Ctrl+C，信号驱动优雅关闭+日志） |
 | 14 | `logger_module` | `logger_demo`（多文件模块：init → info/warn/error → close） |
 | 15 | `nonblock_io` | `nonblock_demo`（fcntl 设置 stdin 非阻塞，处理 EAGAIN） |
+
+## Week 3：虚拟文件系统与设备文件
+
+**目标**：理解 Linux 内核导出的虚拟文件系统（/proc、/sys）和设备文件（/dev），掌握通过文件接口访问内核信息和设备的基本方法。
+
+| 天次 | 项目 | 核心产出 |
+|:---:|------|------|
+| 16 | `proc_sys_dev` | `system_probe`（读取 /proc/cpuinfo、/proc/meminfo、写入 /dev/null、读取 /dev/zero） |
 
 ---
 
@@ -216,6 +228,14 @@ cat logs/app.log   # 查看带时间戳的分级日志
 # Day 15 — 非阻塞 IO（stdin 不卡住，输入 quit 退出）
 cd linux_projects/day15_nonblock_io
 make && ./build/nonblock_demo
+
+# === Week 3 ===
+# Day 16 — 虚拟文件系统（/proc、/dev）
+cd linux_projects/day16_proc_sys_dev
+make && ./build/system_probe cpu     # 查看 CPU 信息
+./build/system_probe mem              # 查看内存信息
+./build/system_probe null             # 测试 /dev/null 写入
+./build/system_probe zero             # 测试 /dev/zero 读取
 ```
 
 ---
@@ -254,5 +274,5 @@ make && ./build/nonblock_demo
 ---
 
 <p align="center">
-  <sub>从编译选项到进程信号，每天进步一点点 🚀</sub>
+  <sub>从编译选项到 /proc /dev，每天进步一点点 🚀</sub>
 </p>
