@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl、mmap 与文件监控。
 
 ---
 
@@ -11,7 +11,7 @@
 - [学习路线](#学习路线)
 - [Week 1：编译工具链](#week-1编译工具链)
 - [Week 2：系统编程](#week-2系统编程)
-- [Week 3：设备接口与虚拟文件系统](#week-3设备接口与虚拟文件系统)
+- [Week 3：设备接口、综合项目与总结](#week-3设备接口综合项目与总结)
 - [环境要求](#环境要求)
 - [快速开始](#快速开始)
 - [并行学习轨道](#并行学习轨道)
@@ -28,7 +28,7 @@
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → Week 2 综合项目（文件监控工具）。
 
 ---
 
@@ -54,7 +54,8 @@ linux-embedded-learning/
 │   ├── day14.md                         # 日志模块：时间戳、分级日志、模块封装
 │   ├── day15.md                         # 非阻塞 IO：fcntl、O_NONBLOCK、EAGAIN
 │   ├── day16.md                         # /proc、/sys、/dev — 虚拟文件系统与设备文件
-│   └── day17.md                         # ioctl 和 mmap 入门
+│   ├── day17.md                         # ioctl 和 mmap 入门
+│   └── day18.md                         # Week 2 复盘：文件监控工具
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -73,11 +74,12 @@ linux-embedded-learning/
 │   ├── day14_logger_module/             # 日志模块 — 多文件 C 项目 + 时间戳日志
 │   ├── day15_nonblock_io/               # 非阻塞 IO — fcntl + O_NONBLOCK + EAGAIN
 │   ├── day16_proc_sys_dev/              # 系统探测 — /proc、/dev/null、/dev/zero
-│   └── day17_ioctl_mmap_intro/          # ioctl 终端查询 + mmap 文件映射
+│   ├── day17_ioctl_mmap_intro/          # ioctl 终端查询 + mmap 文件映射
+│   └── day18_file_monitor_tool/         # Week 2 复盘 — 文件监控工具
 │
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
-│   ├── notes/                           # 笔记副本（day01~day17）
-│   └── projects/                        # 项目副本（day01~day17）
+│   ├── notes/                           # 笔记副本（day01~day18）
+│   └── projects/                        # 项目副本（day01~day18）
 │
 ├── qt_projects/                         # Qt 嵌入式 HMI 项目（Day 4+ 并行轨道）
 ├── Linux_Embedded_App_Summer_Plan.md    # 暑期学习总体计划
@@ -89,7 +91,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 全 17 天总览
+### 📅 全 18 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -110,6 +112,7 @@ linux-embedded-learning/
 | 15 | 非阻塞 IO | 07-18 | `fcntl`, `F_GETFL`/`F_SETFL`, `O_NONBLOCK`, `EAGAIN` |
 | 16 | /proc、/sys、/dev | 07-20 | `/proc/cpuinfo`, `/proc/meminfo`, `/dev/null`, `/dev/zero` |
 | 17 | ioctl 与 mmap 入门 | 07-20 | `ioctl`, `TIOCGWINSZ`, `mmap`, `munmap`, `MAP_PRIVATE` |
+| 18 | Week 2 复盘：文件监控工具 | 07-21 | `stat`, `fopen`/`fprintf`, `sigaction`, 配置文件解析, 周期性轮询 |
 
 ---
 
@@ -142,14 +145,15 @@ linux-embedded-learning/
 | 14 | `logger_module` | `logger_demo`（多文件模块：init → info/warn/error → close） |
 | 15 | `nonblock_io` | `nonblock_demo`（fcntl 设置 stdin 非阻塞，处理 EAGAIN） |
 
-## Week 3：设备接口与虚拟文件系统
+## Week 3：设备接口、综合项目与总结
 
-**目标**：理解 Linux 设备文件模型，掌握 ioctl 设备控制和 mmap 内存映射两种关键接口，为后续嵌入式驱动开发打基础。
+**目标**：理解 Linux 设备文件模型，掌握 ioctl 设备控制和 mmap 内存映射两种关键接口，并通过一个综合文件监控项目串联前两周的核心技能（stat、sigaction、日志、配置文件解析），为后续嵌入式驱动开发打基础。
 
 | 天次 | 项目 | 核心产出 |
 |:---:|------|------|
 | 16 | `proc_sys_dev` | `system_probe`（读取 /proc/cpuinfo/meminfo，读写 /dev/null/zero） |
 | 17 | `ioctl_mmap_intro` | `ioctl_mmap_intro`（ioctl 查询终端窗口大小，mmap 映射文件到内存） |
+| 18 | `file_monitor_tool` | `file_monitor_tool`（配置文件驱动，stat 周期性轮询，sigaction 优雅退出，日志记录） |
 
 ---
 
@@ -244,6 +248,13 @@ make && ./build/system_probe cpu
 cd linux_projects/day17_ioctl_mmap_intro
 make && ./build/ioctl_mmap_intro winsize
 ./build/ioctl_mmap_intro mmap
+
+# === Week 3 ===
+# Day 18 — 文件监控工具（配置文件解析 + stat 轮询 + 信号优雅退出）
+cd linux_projects/day18_file_monitor_tool
+make && make run     # 终端 1：启动监控
+make append          # 终端 2：修改文件触发检测
+make show_log        # 查看监控日志
 ```
 
 ---
