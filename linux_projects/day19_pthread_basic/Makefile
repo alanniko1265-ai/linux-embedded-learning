@@ -1,17 +1,15 @@
 cc := gcc
-st := -Wall -g -O0
-bu := build
-ta := $(bu)/dir_scan
+st := -Wall -g -O0 -pthread
 sr := src/main.c
+bu := build
+ta := $(bu)/thread_status_demo
 all:$(ta)
 $(ta):$(sr) | $(bu)
 	$(cc) $(st) $(sr) -o $(ta)
 $(bu):
 	mkdir -p $(bu)
 run:$(ta)
-	./$(ta) data
-run-m:$(ta)
-	./$(ta) not_exist_dir
+	./$(ta)
 clean:
 	rm -rf $(bu)
-.PHONY:all run run-m clean
+.PHONY:all run clean

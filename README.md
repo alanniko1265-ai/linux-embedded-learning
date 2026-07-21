@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl、mmap 与文件监控。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl、mmap、文件监控与多线程。
 
 ---
 
@@ -11,24 +11,23 @@
 - [学习路线](#学习路线)
 - [Week 1：编译工具链](#week-1编译工具链)
 - [Week 2：系统编程](#week-2系统编程)
-- [Week 3：设备接口、综合项目与总结](#week-3设备接口综合项目与总结)
+- [Week 3：设备接口、综合项目与多线程](#week-3设备接口综合项目与多线程)
 - [环境要求](#环境要求)
 - [快速开始](#快速开始)
-- [并行学习轨道](#并行学习轨道)
-- [相关文档](#相关文档)
+- [项目规范](#项目规范)
 
 ---
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的三周 Linux 嵌入式 C 编程自学过程。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → Week 2 综合项目（文件监控工具）。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 文件监控综合项目 → pthread 多线程。
 
 ---
 
@@ -55,43 +54,36 @@ linux-embedded-learning/
 │   ├── day15.md                         # 非阻塞 IO：fcntl、O_NONBLOCK、EAGAIN
 │   ├── day16.md                         # /proc、/sys、/dev — 虚拟文件系统与设备文件
 │   ├── day17.md                         # ioctl 和 mmap 入门
-│   └── day18.md                         # Week 2 复盘：文件监控工具
+│   ├── day18.md                         # Week 2 复盘：文件监控工具
+│   └── day19.md                         # pthread 线程基础
 │
-├── linux_projects/                      # 💻 Linux C 练习项目
-│   ├── day01_hello_linux/               # Hello World — 环境验证
-│   ├── day02_compile_flow/              # 多文件编译四阶段（预处理→汇编→链接）
-│   ├── day03_makefile_basic/            # Makefile 编写练习
-│   ├── day04_cmake_basic/               # CMake 构建练习
-│   ├── day05_gdb_debug/                 # GDB 断点/单步/内存调试
-│   ├── day06_static_shared_lib/         # 静态库 (.a) 与动态库 (.so)
-│   ├── day07_linux_toolbox_v1/          # Week 1 复盘 — 多文件 C CLI 工具
-│   ├── day08_file_io/                   # 文件 IO — my_cat / my_cp 系统调用
-│   ├── day09_file_io_utils/             # 文件 IO — write_all 封装 / safe_cp
-│   ├── day10_file_stat/                 # 文件属性 — stat、类型识别、权限解析
-│   ├── day11_dir_scan/                  # 目录遍历 — opendir/readdir/closedir
-│   ├── day12_process_runner/            # 进程管理 — fork + execvp + waitpid
-│   ├── day13_signal_guard/              # 信号处理 — SIGINT 捕获与优雅关闭
-│   ├── day14_logger_module/             # 日志模块 — 多文件 C 项目 + 时间戳日志
-│   ├── day15_nonblock_io/               # 非阻塞 IO — fcntl + O_NONBLOCK + EAGAIN
-│   ├── day16_proc_sys_dev/              # 系统探测 — /proc、/dev/null、/dev/zero
-│   ├── day17_ioctl_mmap_intro/          # ioctl 终端查询 + mmap 文件映射
-│   └── day18_file_monitor_tool/         # Week 2 复盘 — 文件监控工具
-│
-├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
-│   ├── notes/                           # 笔记副本（day01~day18）
-│   └── projects/                        # 项目副本（day01~day18）
-│
-├── qt_projects/                         # Qt 嵌入式 HMI 项目（Day 4+ 并行轨道）
-├── Linux_Embedded_App_Summer_Plan.md    # 暑期学习总体计划
-├── Qt_Linux_HMI_Plan_From_Day4.md       # Qt / Linux HMI 专项路线图
-└── .gitignore
+└── linux_projects/                      # 💻 Linux C 练习项目
+    ├── day01_hello_linux/               # Hello World — 环境验证
+    ├── day02_compile_flow/              # 多文件编译四阶段（预处理→汇编→链接）
+    ├── day03_makefile_basic/            # Makefile 编写练习
+    ├── day04_cmake_basic/               # CMake 构建练习
+    ├── day05_gdb_debug/                 # GDB 断点/单步/内存调试
+    ├── day06_static_shared_lib/         # 静态库 (.a) 与动态库 (.so)
+    ├── day07_linux_toolbox_v1/          # Week 1 复盘 — 多文件 C CLI 工具
+    ├── day08_file_io/                   # 文件 IO — my_cat / my_cp 系统调用
+    ├── day09_file_io_utils/             # 文件 IO — write_all 封装 / safe_cp
+    ├── day10_file_stat/                 # 文件属性 — stat、类型识别、权限解析
+    ├── day11_dir_scan/                  # 目录遍历 — opendir/readdir/closedir
+    ├── day12_process_runner/            # 进程管理 — fork + execvp + waitpid
+    ├── day13_signal_guard/              # 信号处理 — SIGINT 捕获与优雅关闭
+    ├── day14_logger_module/             # 日志模块 — 多文件 C 项目 + 时间戳日志
+    ├── day15_nonblock_io/               # 非阻塞 IO — fcntl + O_NONBLOCK + EAGAIN
+    ├── day16_proc_sys_dev/              # 系统探测 — /proc、/dev/null、/dev/zero
+    ├── day17_ioctl_mmap_intro/          # ioctl 终端查询 + mmap 文件映射
+    ├── day18_file_monitor_tool/         # Week 2 复盘 — 文件监控工具
+    └── day19_pthread_basic/             # pthread 线程基础 — 互斥锁、竞态条件
 ```
 
 ---
 
 ## 学习路线
 
-### 📅 全 18 天总览
+### 📅 全 19 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -113,6 +105,7 @@ linux-embedded-learning/
 | 16 | /proc、/sys、/dev | 07-20 | `/proc/cpuinfo`, `/proc/meminfo`, `/dev/null`, `/dev/zero` |
 | 17 | ioctl 与 mmap 入门 | 07-20 | `ioctl`, `TIOCGWINSZ`, `mmap`, `munmap`, `MAP_PRIVATE` |
 | 18 | Week 2 复盘：文件监控工具 | 07-21 | `stat`, `fopen`/`fprintf`, `sigaction`, 配置文件解析, 周期性轮询 |
+| 19 | pthread 线程基础 | 07-21 | `pthread_create`, `pthread_join`, `pthread_mutex_t`, 竞态条件 |
 
 ---
 
@@ -145,15 +138,16 @@ linux-embedded-learning/
 | 14 | `logger_module` | `logger_demo`（多文件模块：init → info/warn/error → close） |
 | 15 | `nonblock_io` | `nonblock_demo`（fcntl 设置 stdin 非阻塞，处理 EAGAIN） |
 
-## Week 3：设备接口、综合项目与总结
+## Week 3：设备接口、综合项目与多线程
 
-**目标**：理解 Linux 设备文件模型，掌握 ioctl 设备控制和 mmap 内存映射两种关键接口，并通过一个综合文件监控项目串联前两周的核心技能（stat、sigaction、日志、配置文件解析），为后续嵌入式驱动开发打基础。
+**目标**：理解 Linux 设备文件模型，掌握 ioctl 和 mmap 两种关键接口；通过文件监控综合项目串联前两周技能；入门 pthread 多线程编程，为嵌入式 Linux 并发应用打基础。
 
 | 天次 | 项目 | 核心产出 |
 |:---:|------|------|
 | 16 | `proc_sys_dev` | `system_probe`（读取 /proc/cpuinfo/meminfo，读写 /dev/null/zero） |
 | 17 | `ioctl_mmap_intro` | `ioctl_mmap_intro`（ioctl 查询终端窗口大小，mmap 映射文件到内存） |
 | 18 | `file_monitor_tool` | `file_monitor_tool`（配置文件驱动，stat 周期性轮询，sigaction 优雅退出，日志记录） |
+| 19 | `pthread_basic` | `thread_status_demo`（pthread_create/join，互斥锁保护共享变量，竞态条件验证） |
 
 ---
 
@@ -167,7 +161,7 @@ linux-embedded-learning/
 | **GDB** | 调试器（Day 5） | 任意 |
 | **Linux / WSL** | 运行环境 | Ubuntu 20.04+ (WSL2) |
 
-**平台说明**：本项目在 Windows 11 + WSL (Ubuntu) 环境下开发。所有代码使用 POSIX API，在原生 Linux 或 WSL 中均可编译运行。MinGW 可编译部分早期项目，但涉及 `fork`、`sigaction` 等系统调用的项目需要真实 Linux 内核。
+**平台说明**：本项目在 Windows 11 + WSL (Ubuntu) 环境下开发。所有代码使用 POSIX API，在原生 Linux 或 WSL 中均可编译运行。MinGW 可编译部分早期项目，但涉及 `fork`、`sigaction`、`pthread` 等系统调用的项目需要真实 Linux 内核。
 
 ---
 
@@ -237,6 +231,7 @@ cat logs/app.log   # 查看带时间戳的分级日志
 cd linux_projects/day15_nonblock_io
 make && ./build/nonblock_demo
 
+# === Week 3 ===
 # Day 16 — 系统探测（读取 /proc 和 /dev 设备文件）
 cd linux_projects/day16_proc_sys_dev
 make && ./build/system_probe cpu
@@ -249,29 +244,16 @@ cd linux_projects/day17_ioctl_mmap_intro
 make && ./build/ioctl_mmap_intro winsize
 ./build/ioctl_mmap_intro mmap
 
-# === Week 3 ===
 # Day 18 — 文件监控工具（配置文件解析 + stat 轮询 + 信号优雅退出）
 cd linux_projects/day18_file_monitor_tool
 make && make run     # 终端 1：启动监控
 make append          # 终端 2：修改文件触发检测
 make show_log        # 查看监控日志
+
+# Day 19 — pthread 多线程基础（互斥锁、竞态条件验证）
+cd linux_projects/day19_pthread_basic
+make && make run
 ```
-
----
-
-## 并行学习轨道
-
-除主线 Linux C 系统编程外，本仓库还包含两条并行轨道：
-
-### Qt 嵌入式 HMI（`qt_projects/`）
-
-从 Day 4 开始并行的 Qt/C++ 学习线，面向嵌入式 Linux HMI 应用开发。涵盖 Qt Widgets、信号与槽、串口通信、TCP 客户端、多线程 Worker 等。
-
-详见 [Qt_Linux_HMI_Plan_From_Day4.md](./Qt_Linux_HMI_Plan_From_Day4.md)
-
-### 学习笔记镜像（`linux-learning-notes/`）
-
-笔记与项目的完整镜像副本，保持与主目录同步更新。
 
 ---
 
@@ -279,19 +261,12 @@ make show_log        # 查看监控日志
 
 - **代码风格**：C11 标准，统一使用 `include/` + `src/` + `build/` 目录结构
 - **构建约定**：Makefile 提供 `all`（默认）、`run`、`clean` 三个标准目标
-- **编译选项**：`-Wall -g -O0`（全警告 + 调试符号 + 无优化）
+- **编译选项**：`-Wall -g -O0`（全警告 + 调试符号 + 无优化）；涉及 pthread 的项目加 `-pthread`
 - **头文件保护**：所有 `.h` 使用 `#ifndef` / `#define` / `#endif` 守卫
 - **错误处理**：系统调用返回值检查 + `perror()` 输出
 
 ---
 
-## 相关文档
-
-- **[Linux_Embedded_App_Summer_Plan.md](./Linux_Embedded_App_Summer_Plan.md)** — 暑期学习总体计划
-- **[Qt_Linux_HMI_Plan_From_Day4.md](./Qt_Linux_HMI_Plan_From_Day4.md)** — Qt / Linux HMI 专项路线图
-
----
-
 <p align="center">
-  <sub>从编译选项到进程信号，每天进步一点点 🚀</sub>
+  <sub>从编译选项到多线程，每天进步一点点 🚀</sub>
 </p>
