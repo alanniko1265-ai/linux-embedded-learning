@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程与生产者消费者模型。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型与 IPC 进程间通信（pipe / FIFO）。
 
 ---
 
@@ -13,6 +13,7 @@
 - [Week 2：系统编程](#week-2系统编程)
 - [Week 3：设备接口与虚拟文件系统](#week-3设备接口与虚拟文件系统)
 - [Week 4：多线程编程](#week-4多线程编程)
+- [Week 5：IPC 进程间通信](#week-5ipc-进程间通信)
 - [环境要求](#环境要求)
 - [快速开始](#快速开始)
 - [并行学习轨道](#并行学习轨道)
@@ -29,7 +30,7 @@
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）。
 
 ---
 
@@ -58,7 +59,8 @@ linux-embedded-learning/
 │   ├── day17.md                         # ioctl 和 mmap 入门
 │   ├── day18.md                         # Week 2 综合：file_monitor_tool 文件监控
 │   ├── day19.md                         # pthread 线程基础：创建、join、互斥锁
-│   └── day20.md                         # 线程同步：生产者消费者队列（mutex + cond）
+│   ├── day20.md                         # 线程同步：生产者消费者队列（mutex + cond）
+│   └── day21.md                         # IPC 基础：pipe 父子进程通信 + FIFO 命名管道
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -80,11 +82,12 @@ linux-embedded-learning/
 │   ├── day17_ioctl_mmap_intro/          # ioctl 终端查询 + mmap 文件映射
 │   ├── day18_file_monitor_tool/         # 文件监控工具：配置解析 + stat + 信号
 │   ├── day19_pthread_basic/             # pthread 基础：线程创建、互斥锁
-│   └── day20_thread_queue/              # 线程安全队列：mutex + cond + 生产者消费者
+│   ├── day20_thread_queue/              # 线程安全队列：mutex + cond + 生产者消费者
+│   └── day21_ipc_basic/                 # IPC 基础：pipe + FIFO 进程间通信
 │
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
-│   ├── notes/                           # 笔记副本（day01~day20）
-│   └── projects/                        # 项目副本（day01~day20）
+│   ├── notes/                           # 笔记副本（day01~day21）
+│   └── projects/                        # 项目副本（day01~day21）
 │
 ├── qt_projects/                         # Qt 嵌入式 HMI 项目（Day 4+ 并行轨道）
 ├── Linux_Embedded_App_Summer_Plan.md    # 暑期学习总体计划
@@ -96,7 +99,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 全 20 天总览
+### 📅 全 21 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -120,6 +123,7 @@ linux-embedded-learning/
 | 18 | Week 2 综合项目：文件监控 | 07-21 | `stat`, `fopen`/`fgets`, `sscanf`, `sigaction`, 配置文件解析 |
 | 19 | pthread 线程基础 | 07-21 | `pthread_create`, `pthread_join`, `pthread_mutex_lock`/`unlock` |
 | 20 | 线程同步：生产者消费者队列 | 07-22 | `pthread_cond_wait`, `pthread_cond_signal`, 环形队列, 生产者消费者模型 |
+| 21 | IPC 基础：pipe 与 FIFO | 07-22 | `pipe`, `mkfifo`, `fork`, `read`/`write`, FIFO reader/writer |
 
 ---
 
@@ -170,6 +174,14 @@ linux-embedded-learning/
 | 18 | `file_monitor_tool` | Week 2 综合项目：配置文件驱动、stat 监控文件变化、信号优雅退出 |
 | 19 | `pthread_basic` | 多线程计数：`pthread_create`/`pthread_join`、`pthread_mutex_t` 保护共享变量 |
 | 20 | `thread_queue` | 线程安全环形队列：`pthread_cond_t` 条件变量、生产者消费者模型 |
+
+## Week 5：IPC 进程间通信
+
+**目标**：掌握 Linux 进程间通信（IPC）基础，理解 pipe 父子进程通信和 FIFO 命名管道独立进程通信两种方式，为嵌入式设备网关的多进程数据传递打基础。
+
+| 天次 | 项目 | 核心产出 |
+|:---:|------|------|
+| 21 | `ipc_basic` | `pipe_demo`（父子进程 pipe 通信）+ `fifo_reader`/`fifo_writer`（独立进程 FIFO 通信）
 
 ---
 
@@ -280,6 +292,17 @@ make && ./build/pthread_basic
 # Day 20 — 线程安全生产者消费者队列
 cd linux_projects/day20_thread_queue
 make && ./build/thread_queue
+
+# === Week 5 ===
+# Day 21 — IPC 基础：pipe 父子进程通信
+cd linux_projects/day21_ipc_basic
+make && make runp
+
+# Day 21 — FIFO 独立进程通信（需要两个终端）
+# 终端 1：先启动 reader（会阻塞等待 writer）
+make runr
+# 终端 2：再启动 writer 发送设备数据
+make runw
 ```
 
 ---
