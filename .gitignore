@@ -33,6 +33,10 @@ temp_repo/
 *.swo
 *~
 
+# 日志文件
+logs/
+*.log
+
 # linux-learning-notes 镜像 — 同样忽略编译产物
 linux-learning-notes/projects/*/build/
 linux-learning-notes/projects/*/hello*
