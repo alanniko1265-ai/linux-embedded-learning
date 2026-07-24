@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 字节流）。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select IO 多路复用）。
 
 ---
 
@@ -25,14 +25,14 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，历时六周共 23 天。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，历时七周共 25 天。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 字节流）。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select IO 多路复用）。
 
 ---
 
@@ -62,9 +62,11 @@ linux-embedded-learning/
 │   ├── day18.md                         # Week 2 综合：file_monitor_tool 文件监控
 │   ├── day19.md                         # pthread 线程基础：创建、join、互斥锁
 │   ├── day20.md                         # 线程同步：生产者消费者队列（mutex + cond）
-│   └── day21.md                         # IPC 基础：pipe 父子进程通信 + FIFO 命名管道
-│   └── day22.md                         # 本地命令服务器：FIFO IPC + server 长期运行 + 信号优雅退出
-│   └── day23.md                         # TCP echo server：socket 编程、TCP 字节流、client/server 架构
+│   ├── day21.md                         # IPC 基础：pipe 父子进程通信 + FIFO 命名管道
+│   ├── day22.md                         # 本地命令服务器：FIFO IPC + server 长期运行 + 信号优雅退出
+│   ├── day23.md                         # TCP echo server：socket 编程、TCP 字节流、client/server 架构
+│   ├── day24.md                         # 多客户端 TCP server：pthread 每连接一线程
+│   └── day25.md                         # select IO 多路复用：单线程管理多客户端
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -87,13 +89,15 @@ linux-embedded-learning/
 │   ├── day18_file_monitor_tool/         # 文件监控工具：配置解析 + stat + 信号
 │   ├── day19_pthread_basic/             # pthread 基础：线程创建、互斥锁
 │   ├── day20_thread_queue/              # 线程安全队列：mutex + cond + 生产者消费者
-│   └── day21_ipc_basic/                 # IPC 基础：pipe + FIFO 进程间通信
-│   └── day22_local_command_server/       # 本地命令服务器：FIFO + 信号 + 日志
-│   └── day23_tcp_echo/                  # TCP echo server/client：socket 编程 + 字节流
+│   ├── day21_ipc_basic/                 # IPC 基础：pipe + FIFO 进程间通信
+│   ├── day22_local_command_server/       # 本地命令服务器：FIFO + 信号 + 日志
+│   ├── day23_tcp_echo/                  # TCP echo server/client：socket 编程 + 字节流
+│   ├── day24_multi_client_server/        # 多客户端 TCP server：pthread 每连接一线程
+│   └── day25_select_server/              # select IO 多路复用：单线程管理多客户端
 │
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
-│   ├── notes/                           # 笔记副本（day01~day23）
-│   └── projects/                        # 项目副本（day01~day23）
+│   ├── notes/                           # 笔记副本（day01~day25）
+│   └── projects/                        # 项目副本（day01~day25）
 │
 ├── qt_projects/                         # Qt 嵌入式 HMI 项目（Day 4+ 并行轨道）
 ├── Linux_Embedded_App_Summer_Plan.md    # 暑期学习总体计划
@@ -105,7 +109,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 全 23 天总览
+### 📅 全 25 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -132,6 +136,8 @@ linux-embedded-learning/
 | 21 | IPC 基础：pipe 与 FIFO | 07-22 | `pipe`, `mkfifo`, `fork`, `read`/`write`, FIFO reader/writer |
 | 22 | 本地命令服务器 | 07-23 | FIFO IPC、server 长期运行、keep_fd 技巧、信号优雅退出、日志 |
 | 23 | TCP echo server | 07-23 | `socket`, `bind`, `listen`, `accept`, `send`/`recv`, TCP 字节流, client/server 架构 |
+| 24 | 多客户端 TCP server | 07-24 | `pthread_create`, `pthread_detach`, `malloc`/`free` 传参, 每连接一线程 |
+| 25 | select IO 多路复用 | 07-24 | `select`, `fd_set`, `FD_ZERO`/`FD_SET`/`FD_ISSET`, 单线程管理多客户端 |
 
 ---
 
@@ -202,11 +208,13 @@ linux-embedded-learning/
 
 ## Week 7：网络编程
 
-**目标**：进入 Linux 网络编程，掌握 TCP socket 编程基础，理解 client/server 架构和 TCP 字节流特性，为后续嵌入式网络通信打基础。
+**目标**：进入 Linux 网络编程，掌握 TCP socket 编程基础，理解 client/server 架构、TCP 字节流特性、多线程并发模型和 IO 多路复用，为后续嵌入式网络通信打基础。
 
 | 天次 | 项目 | 核心产出 |
 |:---:|------|------|
 | 23 | `tcp_echo` | TCP echo server（`socket` → `bind` → `listen` → `accept` → `recv`/`send`）+ TCP client（`socket` → `connect` → `send` → `recv`）+ 连续处理多个 client + 理解 TCP 字节流不保留消息边界 |
+| 24 | `multi_client_server` | 多客户端 TCP server：主线程 `accept` + `pthread_create` worker 线程 `recv`/`send` + `pthread_detach` 自动回收 + `malloc`/`free` 传参 |
+| 25 | `select_server` | select IO 多路复用：`fd_set` 管理 server_fd + 多个 client_fd + `FD_ISSET` 事件分发 + 单线程处理所有客户端 + 对比三种 IO 模型 |
 
 ---
 
@@ -360,6 +368,33 @@ make run4      # 发送 "set led on"
 ./build/tcp_client hello tcp
 ./build/tcp_client status
 ./build/tcp_client set led on
+```
+
+# Day 24 — 多客户端 TCP server（pthread 每连接一线程）
+cd linux_projects/day24_multi_client_server
+make
+# 终端 1：启动 server（监听 0.0.0.0:9000，每个 client 独立线程）
+make run1
+# 终端 2：启动多个 client
+make run2      # client #1 发送并接收
+# 终端 3：
+make run3      # client #2 并发连接
+# 或直接运行：
+./build/tcp_client hello from client1
+./build/tcp_client status
+
+# Day 25 — select IO 多路复用（单线程管理多客户端）
+cd linux_projects/day25_select_server
+make
+# 终端 1：启动 select server（监听 0.0.0.0:9000，select 多路复用）
+make run1
+# 终端 2：启动多个 client
+make run2      # client #1
+# 终端 3：
+make run3      # client #2 并发连接
+# 或直接运行：
+./build/tcp_client hello select
+./build/tcp_client status
 ```
 
 ---
