@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select IO 多路复用）。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll IO 多路复用）。
 
 ---
 
@@ -25,7 +25,7 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，历时七周共 25 天。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 26 天。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
@@ -66,7 +66,8 @@ linux-embedded-learning/
 │   ├── day22.md                         # 本地命令服务器：FIFO IPC + server 长期运行 + 信号优雅退出
 │   ├── day23.md                         # TCP echo server：socket 编程、TCP 字节流、client/server 架构
 │   ├── day24.md                         # 多客户端 TCP server：pthread 每连接一线程
-│   └── day25.md                         # select IO 多路复用：单线程管理多客户端
+│   ├── day25.md                         # select IO 多路复用：单线程管理多客户端
+│   └── day26.md                         # poll IO 多路复用：pollfd 数组与 events/revents
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -93,7 +94,8 @@ linux-embedded-learning/
 │   ├── day22_local_command_server/       # 本地命令服务器：FIFO + 信号 + 日志
 │   ├── day23_tcp_echo/                  # TCP echo server/client：socket 编程 + 字节流
 │   ├── day24_multi_client_server/        # 多客户端 TCP server：pthread 每连接一线程
-│   └── day25_select_server/              # select IO 多路复用：单线程管理多客户端
+│   ├── day25_select_server/              # select IO 多路复用：单线程管理多客户端
+│   └── day26_poll_server/                # poll IO 多路复用：单线程管理多客户端
 │
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
 │   ├── notes/                           # 笔记副本（day01~day25）
@@ -109,7 +111,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 全 25 天总览
+### 📅 已完成 26 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -138,6 +140,7 @@ linux-embedded-learning/
 | 23 | TCP echo server | 07-23 | `socket`, `bind`, `listen`, `accept`, `send`/`recv`, TCP 字节流, client/server 架构 |
 | 24 | 多客户端 TCP server | 07-24 | `pthread_create`, `pthread_detach`, `malloc`/`free` 传参, 每连接一线程 |
 | 25 | select IO 多路复用 | 07-24 | `select`, `fd_set`, `FD_ZERO`/`FD_SET`/`FD_ISSET`, 单线程管理多客户端 |
+| 26 | poll IO 多路复用 | 07-27 | `poll`, `struct pollfd`, `events`/`revents`, `POLLIN` |
 
 ---
 
@@ -215,6 +218,7 @@ linux-embedded-learning/
 | 23 | `tcp_echo` | TCP echo server（`socket` → `bind` → `listen` → `accept` → `recv`/`send`）+ TCP client（`socket` → `connect` → `send` → `recv`）+ 连续处理多个 client + 理解 TCP 字节流不保留消息边界 |
 | 24 | `multi_client_server` | 多客户端 TCP server：主线程 `accept` + `pthread_create` worker 线程 `recv`/`send` + `pthread_detach` 自动回收 + `malloc`/`free` 传参 |
 | 25 | `select_server` | select IO 多路复用：`fd_set` 管理 server_fd + 多个 client_fd + `FD_ISSET` 事件分发 + 单线程处理所有客户端 + 对比三种 IO 模型 |
+| 26 | `poll_server` | poll IO 多路复用：`pollfd` 数组管理 server_fd + 多个 client_fd + `events`/`revents` 事件分发 |
 
 ---
 
