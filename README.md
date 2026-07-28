@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用 / 粘包拆包与应用层协议设计）。
 
 ---
 
@@ -25,14 +25,14 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 27 天。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 28 天。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ 应用层协议设计（粘包/拆包处理）。
 
 ---
 
@@ -68,7 +68,8 @@ linux-embedded-learning/
 │   ├── day24.md                         # 多客户端 TCP server：pthread 每连接一线程
 │   ├── day25.md                         # select IO 多路复用：单线程管理多客户端
 │   ├── day26.md                         # poll IO 多路复用：pollfd 数组与 events/revents
-│   └── day27.md                         # epoll IO 多路复用：epoll_create1/ctl/wait
+│   ├── day27.md                         # epoll IO 多路复用：epoll_create1/ctl/wait
+│   └── day28.md                         # TCP 粘包/拆包与应用层协议设计
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -97,7 +98,8 @@ linux-embedded-learning/
 │   ├── day24_multi_client_server/        # 多客户端 TCP server：pthread 每连接一线程
 │   ├── day25_select_server/              # select IO 多路复用：单线程管理多客户端
 │   ├── day26_poll_server/                # poll IO 多路复用：单线程管理多客户端
-│   └── day27_epoll_server/               # epoll IO 多路复用：Linux 高效事件通知
+│   ├── day27_epoll_server/               # epoll IO 多路复用：Linux 高效事件通知
+│   └── day28_tcp_protocol/               # TCP 应用层协议：粘包/拆包 + 消息边界
 │
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
 │   ├── notes/                           # 笔记副本（day01~day25）
@@ -113,7 +115,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 已完成 27 天总览
+### 📅 已完成 28 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -144,6 +146,7 @@ linux-embedded-learning/
 | 25 | select IO 多路复用 | 07-24 | `select`, `fd_set`, `FD_ZERO`/`FD_SET`/`FD_ISSET`, 单线程管理多客户端 |
 | 26 | poll IO 多路复用 | 07-27 | `poll`, `struct pollfd`, `events`/`revents`, `POLLIN` |
 | 27 | epoll IO 多路复用 | 07-27 | `epoll_create1`, `epoll_ctl`, `epoll_wait`, `EPOLLIN` |
+| 28 | TCP 粘包/拆包与应用层协议 | 07-28 | 4 字节长度字段 + payload、`htonl`/`ntohl`、`send_all`/`recv_all` |
 
 ---
 
@@ -223,6 +226,7 @@ linux-embedded-learning/
 | 25 | `select_server` | select IO 多路复用：`fd_set` 管理 server_fd + 多个 client_fd + `FD_ISSET` 事件分发 + 单线程处理所有客户端 + 对比三种 IO 模型 |
 | 26 | `poll_server` | poll IO 多路复用：`pollfd` 数组管理 server_fd + 多个 client_fd + `events`/`revents` 事件分发 |
 | 27 | `epoll_server` | epoll IO 多路复用：`epoll_ctl` 注册 server_fd/client_fd + `epoll_wait` 只返回就绪事件 + 单线程处理多客户端 |
+| 28 | `tcp_protocol` | TCP 应用层协议设计：4 字节长度头 + payload、`htonl`/`ntohl` 网络字节序、`send_all`/`recv_all` 防短读写 |
 
 ---
 
@@ -419,6 +423,18 @@ make
 make run1
 # 终端 2 / 终端 3：启动多个交互式 client
 make run2
+
+# Day 28 — TCP 粘包/拆包与应用层协议设计
+cd linux_projects/day28_tcp_protocol
+make
+# 终端 1：启动 protocol server
+make run1
+# 终端 2：发送多种消息
+make run2      # 发送 "hello" + "world"（两条独立消息，server 正确切分）
+make run3      # 发送单条长消息 "This is a message from client"
+# 或直接运行：
+./build/protocol_client hello world
+./build/protocol_client This is a long message
 ```
 
 ---
