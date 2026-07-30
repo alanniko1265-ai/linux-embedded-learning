@@ -1,0 +1,4 @@
+[2026-07-18 10:21:46] [INFO] logger module started
+[2026-07-18 10:21:46] [INFO] device service init simulated
+[2026-07-18 10:21:46] [WARN] device temperature is close to limit
+[2026-07-18 10:21:46] [ERROR] sensor read failed simulated
