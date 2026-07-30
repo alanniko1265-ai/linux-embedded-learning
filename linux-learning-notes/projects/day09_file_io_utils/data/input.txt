@@ -1,3 +1,0 @@
-line 1: linux file io
-line 2: safe write matters
-line 3: embedded linux uses file descriptors everywhere
