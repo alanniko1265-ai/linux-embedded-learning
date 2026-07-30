@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议）。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议、多客户端协议服务器）。
 
 ---
 
@@ -25,14 +25,14 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 29 天。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 30 天。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll 多客户端协议服务器。
 
 ---
 
@@ -70,7 +70,8 @@ linux-embedded-learning/
 │   ├── day26.md                         # poll IO 多路复用：pollfd 数组与 events/revents
 │   ├── day27.md                         # epoll IO 多路复用：epoll_create1/ctl/wait
 │   ├── day28.md                         # TCP 应用层协议：长度头 + payload
-│   └── day29.md                         # TCP 请求-响应协议：send_exact/read_exact
+│   ├── day29.md                         # TCP 请求-响应协议：send_exact/read_exact
+│   └── day30.md                         # epoll 多客户端请求-响应协议服务器
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -101,7 +102,8 @@ linux-embedded-learning/
 │   ├── day26_poll_server/                # poll IO 多路复用：单线程管理多客户端
 │   ├── day27_epoll_server/               # epoll IO 多路复用：Linux 高效事件通知
 │   ├── day28_tcp_protocol/               # TCP 应用层协议：粘包/拆包与长度头
-│   └── day29_request_response/           # TCP 请求-响应协议：命令解析与响应
+│   ├── day29_request_response/           # TCP 请求-响应协议：命令解析与响应
+│   └── day30_epoll_protocol_server/      # epoll 多客户端协议服务器
 │
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
 │   ├── notes/                           # 笔记副本（day01~day25）
@@ -117,7 +119,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 已完成 29 天总览
+### 📅 已完成 30 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -150,6 +152,7 @@ linux-embedded-learning/
 | 27 | epoll IO 多路复用 | 07-27 | `epoll_create1`, `epoll_ctl`, `epoll_wait`, `EPOLLIN` |
 | 28 | TCP 应用层协议 | 07-28 | `uint32_t`, `htonl`, `ntohl`, `length + payload`, `read_exact` |
 | 29 | TCP 请求-响应协议 | 07-29 | `send_exact`, `read_exact`, `send_message`, `read_message`, 命令响应 |
+| 30 | epoll 多客户端协议服务器 | 07-30 | `epoll_wait`, `EPOLL_CTL_ADD`, `send_exact`, `read_message`, 多客户端请求-响应 |
 
 ---
 
@@ -231,6 +234,7 @@ linux-embedded-learning/
 | 27 | `epoll_server` | epoll IO 多路复用：`epoll_ctl` 注册 server_fd/client_fd + `epoll_wait` 只返回就绪事件 + 单线程处理多客户端 |
 | 28 | `tcp_protocol` | TCP 应用层协议：4 字节长度头 + payload，解决 TCP 字节流消息边界问题 |
 | 29 | `request_response` | TCP 请求-响应协议：client 发送命令，server 解析并返回响应，使用 `send_exact`/`read_exact` 保证完整收发 |
+| 30 | `epoll_protocol_server` | epoll 多客户端请求-响应协议服务器：单线程管理多个 client，每个 client 使用 `length + payload` 协议发送命令并接收响应 |
 
 ---
 
@@ -443,6 +447,14 @@ make
 make run1
 # 终端 2：启动 request-response client
 make run2
+
+# Day 30 — epoll 多客户端请求-响应协议服务器
+cd linux_projects/day30_epoll_protocol_server
+make
+# 当前 Makefile 中：终端 1 启动 server
+make run2
+# 终端 2 / 终端 3 启动多个 client
+make run1
 ```
 
 ---
