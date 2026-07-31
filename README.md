@@ -26,14 +26,14 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 31 天。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 32 天。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll + 应用协议单线程命令服务器 → 项目结构重构：protocol / command / server / client 四模块分离。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll + 应用协议单线程命令服务器 → 项目结构重构：protocol / command / server / client 四模块分离 → 日志模块集成：给已有服务增加独立日志模块。
 
 ---
 
@@ -73,7 +73,8 @@ linux-embedded-learning/
 │   ├── day28.md                         # TCP 应用层协议：长度头 + payload
 │   ├── day29.md                         # TCP 请求-响应协议：send_exact/read_exact
 │   ├── day30.md                         # epoll + 请求-响应协议服务器（终章）
-│   └── day31.md                         # 设备网关项目结构重构：多文件模块化
+│   ├── day31.md                         # 设备网关项目结构重构：多文件模块化
+│   └── day32.md                         # 设备网关加入日志模块：logger 模块集成
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -106,15 +107,10 @@ linux-embedded-learning/
 │   ├── day28_tcp_protocol/               # TCP 应用层协议：粘包/拆包与长度头
 │   ├── day29_request_response/           # TCP 请求-响应协议：命令解析与响应
 │   ├── day30_epoll_protocol_server/      # epoll + 应用协议 — 单线程命令服务器
-│   └── day31_device_gateway_refactor/    # 设备网关重构：protocol/command/server/client 模块化
-│
-├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
-│   ├── notes/                           # 笔记副本（day01~day25）
-│   └── projects/                        # 项目副本（day01~day25）
+│   ├── day31_device_gateway_refactor/    # 设备网关重构：protocol/command/server/client 模块化
+│   └── day32_device_gateway_logger/     # 设备网关日志模块：给已有服务增加 logger 模块
 │
 ├── qt_projects/                         # Qt 嵌入式 HMI 项目（并行轨道）
-├── Linux_Embedded_App_Summer_Plan.md    # 暑期学习总体计划
-├── Qt_Linux_HMI_Plan_From_Day4.md       # Qt / Linux HMI 专项路线图
 └── .gitignore
 ```
 
@@ -122,7 +118,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 已完成 31 天总览
+### 📅 已完成 32 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -157,6 +153,7 @@ linux-embedded-learning/
 | 29 | TCP 请求-响应协议 | 07-29 | `send_exact`, `read_exact`, `send_message`, `read_message`, 命令响应 |
 | 30 | epoll + 请求-响应协议 | 07-30 | `epoll` + `length+payload` + 请求-响应, 单线程命令服务器 |
 | 31 | 设备网关项目结构重构 | 07-31 | protocol/command/server/client 模块化、头文件声明 vs 源文件实现、多文件 Makefile |
+| 32 | 设备网关加入日志模块 | 07-31 | logger 模块集成、给已有服务增加辅助模块、日志文件记录关键事件 |
 
 ---
 
@@ -247,6 +244,7 @@ linux-embedded-learning/
 | 29 | `request_response` | TCP 请求-响应协议：client 发送命令，server 解析并返回响应，使用 `send_exact`/`read_exact` 保证完整收发 |
 | 30 | `epoll_protocol_server` | 终章综合项目：epoll 单线程 + length+payload 协议 + 请求-响应模型，构建高性能多客户端命令服务器 |
 | 31 | `device_gateway_refactor` | 项目结构重构：拆分为 protocol / command / server / client 四模块，理解头文件声明与源文件实现分离、多文件 Makefile 链接 |
+| 32 | `device_gateway_logger` | 日志模块集成：给已有服务增加独立的 logger 模块，运行时记录关键事件到日志文件 |
 
 ---
 
@@ -484,6 +482,19 @@ make runc
 ./build/client status
 ./build/client led on
 ./build/client reboot
+
+# Day 32 — 设备网关加入日志模块（logger 模块集成）
+cd linux_projects/day32_device_gateway_logger
+make
+# 终端 1：启动带日志功能的 server
+make runse
+# 终端 2：启动 client 发送命令
+make runc
+# 或直接运行：
+./build/client status
+./build/client led on
+./build/client reboot device
+# 查看日志：cat logs/server.log
 ```
 
 ---
@@ -496,11 +507,9 @@ make runc
 
 从 Day 4 开始并行的 Qt/C++ 学习线，面向嵌入式 Linux HMI 应用开发。涵盖 Qt Widgets、信号与槽、串口通信、TCP 客户端、多线程 Worker 等。
 
-详见 [Qt_Linux_HMI_Plan_From_Day4.md](./Qt_Linux_HMI_Plan_From_Day4.md)
+### 学习笔记（`notes/`）
 
-### 学习笔记镜像（`linux-learning-notes/`）
-
-笔记与项目的完整镜像副本，保持与主目录同步更新。
+每日学习笔记，记录目标清单、命令实践、概念讲解、踩坑记录和学习总结。
 
 ---
 
@@ -516,11 +525,10 @@ make runc
 
 ## 相关文档
 
-- **[Linux_Embedded_App_Summer_Plan.md](./Linux_Embedded_App_Summer_Plan.md)** — 暑期学习总体计划
-- **[Qt_Linux_HMI_Plan_From_Day4.md](./Qt_Linux_HMI_Plan_From_Day4.md)** — Qt / Linux HMI 专项路线图
+- **[Qt_Linux_HMI_Plan_From_Day4.md](./Qt_Linux_HMI_Plan_From_Day4.md)** — Qt / Linux HMI 专项路线图（即将更新）
 
 ---
 
 <p align="center">
-  <sub>从编译选项到 epoll 高性能服务器 + 模块化架构重构，31 天学习计划已完成 🎉</sub>
+  <sub>从编译选项到 epoll 高性能服务器 + 模块化架构重构 + 日志模块集成，32 天学习计划已完成 🎉</sub>
 </p>
