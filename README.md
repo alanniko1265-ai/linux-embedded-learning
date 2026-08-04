@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议、多客户端协议服务器、设备网关模块化重构、日志模块集成、配置文件管理），最后通过模块化重构掌握真实嵌入式项目的工程结构，最终实现完整的设备网关服务器（模块化架构 + 日志 + 配置 + 优雅退出）。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议、多客户端协议服务器、设备网关模块化重构、日志模块集成、配置文件管理），最后通过模块化重构掌握真实嵌入式项目的工程结构，最终实现完整的设备网关服务器（模块化架构 + 日志 + 配置 + 优雅退出 + 设备状态管理）。
 
 ---
 
@@ -26,14 +26,14 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 34 天。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 35 天。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll 多客户端协议服务器 → 设备网关模块化重构 → 日志模块集成 → 配置文件管理 → 信号驱动的优雅退出。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll 多客户端协议服务器 → 设备网关模块化重构 → 日志模块集成 → 配置文件管理 → 信号驱动的优雅退出 → 设备状态管理模块。
 
 ---
 
@@ -77,6 +77,7 @@ linux-embedded-learning/
 │   ├── day32.md                         # 设备网关加入日志模块：logger 模块集成
 │   ├── day33.md                         # 设备网关加入配置文件：config 模块 + gateway.conf
 │   └── day34.md                         # 设备网关优雅退出：信号处理 + EINTR + 资源清理
+│   └── day35.md                         # 设备网关状态管理：拆出 device_state 模块
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -113,6 +114,7 @@ linux-embedded-learning/
 │   ├── day32_device_gateway_logger/      # 设备网关日志模块：给已有服务增加 logger 模块
 │   ├── day33_device_gateway_config/      # 设备网关配置模块：config 文件解析 + gateway.conf
 │   └── day34_device_gateway_graceful_shutdown/  # 设备网关优雅退出：signal + EINTR + 资源清理
+│   └── day35_device_gateway_state/              # 设备网关状态管理：device_state 模块 + status 响应解耦
 │
 ├── qt_projects/                         # Qt 嵌入式 HMI 项目（并行轨道）
 └── .gitignore
@@ -122,7 +124,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 已完成 34 天总览
+### 📅 已完成 35 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -160,6 +162,7 @@ linux-embedded-learning/
 | 32 | 设备网关加入日志模块 | 07-31 | logger 模块集成、给已有服务增加辅助模块、日志文件记录关键事件 |
 | 33 | 设备网关加入配置文件 | 08-03 | config 模块、gateway.conf 配置文件解析、server/client 共享配置 |
 | 34 | 设备网关优雅退出 | 08-03 | `sigaction`、`SIGINT`/`SIGTERM`、`volatile sig_atomic_t`、EINTR 处理、资源清理 |
+| 35 | 设备网关状态管理 | 08-04 | `device_state` 模块、结构体封装、status 响应解耦、命令与状态分离 |
 
 ---
 
@@ -242,7 +245,7 @@ linux-embedded-learning/
 
 ## Week 8：应用协议 & 综合实战
 
-**目标**：在 TCP 网络编程基础上，深入理解 TCP 字节流的粘包/拆包问题，设计并实现应用层协议（length + payload），最终将 epoll 高性能 IO 多路复用与应用协议结合，构建单线程多客户端命令服务器，并通过模块化重构、日志集成和配置管理掌握真实嵌入式项目的工程结构。
+**目标**：在 TCP 网络编程基础上，深入理解 TCP 字节流的粘包/拆包问题，设计并实现应用层协议（length + payload），最终将 epoll 高性能 IO 多路复用与应用协议结合，构建单线程多客户端命令服务器，并通过模块化重构、日志集成和配置管理掌握真实嵌入式项目的工程结构，最终通过设备状态管理模块实现命令与状态的解耦。
 
 | 天次 | 项目 | 核心产出 |
 |:---:|------|------|
@@ -253,6 +256,7 @@ linux-embedded-learning/
 | 32 | `device_gateway_logger` | 日志模块集成：给已有服务增加独立的 logger 模块，运行时记录关键事件到日志文件 |
 | 33 | `device_gateway_config` | 配置文件管理：新增 config 模块解析 gateway.conf，server 和 client 共享同一份配置 |
 | 34 | `device_gateway_graceful_shutdown` | 信号驱动的优雅退出：`sigaction` 捕获 SIGINT/SIGTERM、`volatile sig_atomic_t` 标志位、`epoll_wait` EINTR 处理、`atexit` + 显式资源清理 |
+| 35 | `device_gateway_state` | 设备状态管理模块：`DeviceState` 结构体封装设备状态、`device_state_get_status()` 生成状态字符串、`command.c` 通过状态模块获取 status 响应、命令解析与设备状态解耦 |
 
 ---
 
@@ -525,6 +529,18 @@ make run2
 cat logs/server.log
 ```
 
+# Day 35 — 设备网关状态管理（device_state 模块）
+
+```bash
+cd linux_projects/day35_device_gateway_state
+make
+# 终端 1：启动带状态管理的 server
+make run1
+# 终端 2：启动 client
+make run2
+# 查看日志：cat logs/server.log
+```
+
 ---
 
 ## 并行学习轨道
@@ -558,5 +574,5 @@ cat logs/server.log
 ---
 
 <p align="center">
-  <sub>从编译选项到 epoll 高性能服务器 → 模块化架构重构 → 日志模块集成 → 配置文件管理 → 信号驱动的优雅退出，34 天嵌入式 Linux C 系统编程学习计划圆满完成 🎉</sub>
+  <sub>从编译选项到 epoll 高性能服务器 → 模块化架构重构 → 日志模块集成 → 配置文件管理 → 信号驱动的优雅退出 → 设备状态管理模块，35 天嵌入式 Linux C 系统编程学习计划圆满完成 🎉</sub>
 </p>
