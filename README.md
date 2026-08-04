@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议、多客户端协议服务器、设备网关模块化重构、日志模块集成、配置文件管理），最后通过模块化重构掌握真实嵌入式项目的工程结构，最终实现完整的设备网关服务器（模块化架构 + 日志 + 配置 + 优雅退出 + 设备状态管理 + LED 状态管理 + 动态采样）。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议、多客户端协议服务器、设备网关模块化重构、日志模块集成、配置文件管理），最后通过模块化重构掌握真实嵌入式项目的工程结构，最终实现完整的设备网关服务器（模块化架构 + 日志 + 配置 + 优雅退出 + 设备状态管理 + LED 状态管理 + 动态采样 + 统一响应格式）。
 
 ---
 
@@ -26,14 +26,14 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 37 天。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 38 天。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll 多客户端协议服务器 → 设备网关模块化重构 → 日志模块集成 → 配置文件管理 → 信号驱动的优雅退出 → 设备状态管理模块 → LED 状态管理模块 → 动态采样模块。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll 多客户端协议服务器 → 设备网关模块化重构 → 日志模块集成 → 配置文件管理 → 信号驱动的优雅退出 → 设备状态管理模块 → LED 状态管理模块 → 动态采样模块 → 统一响应格式与错误码模块。
 
 ---
 
@@ -80,6 +80,7 @@ linux-embedded-learning/
 │   └── day35.md                         # 设备网关状态管理：拆出 device_state 模块
 │   └── day36.md                         # 设备网关 LED 状态：led on/off 修改 DeviceState
 │   └── day37.md                         # 设备网关动态采样：status 触发 device_state_update_sample()
+│   └── day38.md                         # 设备网关统一响应：OK code=0 / ERR code=1001
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -119,6 +120,7 @@ linux-embedded-learning/
 │   └── day35_device_gateway_state/              # 设备网关状态管理：device_state 模块 + status 响应解耦
 │   └── day36_device_gateway_led_state/          # 设备网关 LED 状态：led on/off 命令修改 DeviceState
 │   └── day37_device_gateway_dynamic_state/       # 设备网关动态采样：temperature/voltage 模拟传感器更新
+│   └── day38_device_gateway_response_code/        # 设备网关统一响应：OK code=0 msg / ERR code=1001 msg
 │
 ├── qt_projects/                         # Qt 嵌入式 HMI 项目（并行轨道）
 └── .gitignore
@@ -128,7 +130,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 已完成 37 天总览
+### 📅 已完成 38 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -169,6 +171,7 @@ linux-embedded-learning/
 | 35 | 设备网关状态管理 | 08-04 | `device_state` 模块、结构体封装、status 响应解耦、命令与状态分离 |
 | 36 | 设备网关 LED 状态管理 | 08-04 | `led_on`/`led_off` 修改 `DeviceState`、`pthread_mutex_lock` 保护共享状态、status 查看 LED |
 | 37 | 设备网关动态采样 | 08-04 | `device_state_update_sample()`、模拟 temperature/voltage 更新、为 ADC/I2C 传感器预留接口 |
+| 38 | 设备网关统一响应格式 | 08-04 | `OK code=0 msg`、`ERR code=1001 msg`、`RESP_OK`/`RESP_ERR` 宏、snprintf 格式化 |
 
 ---
 
@@ -251,7 +254,7 @@ linux-embedded-learning/
 
 ## Week 8：应用协议 & 综合实战
 
-**目标**：在 TCP 网络编程基础上，深入理解 TCP 字节流的粘包/拆包问题，设计并实现应用层协议（length + payload），最终将 epoll 高性能 IO 多路复用与应用协议结合，构建单线程多客户端命令服务器，并通过模块化重构、日志集成和配置管理掌握真实嵌入式项目的工程结构，最终通过设备状态管理模块实现命令与状态的解耦，并通过 LED 状态管理实现命令与状态的闭环联动，并通过动态采样为后续 ADC/I2C 传感器接入预留接口。
+**目标**：在 TCP 网络编程基础上，深入理解 TCP 字节流的粘包/拆包问题，设计并实现应用层协议（length + payload），最终将 epoll 高性能 IO 多路复用与应用协议结合，构建单线程多客户端命令服务器，并通过模块化重构、日志集成和配置管理掌握真实嵌入式项目的工程结构，最终通过设备状态管理模块实现命令与状态的解耦，并通过 LED 状态管理实现命令与状态的闭环联动，并通过动态采样为后续 ADC/I2C 传感器接入预留接口，并通过统一响应格式与错误码规范化 server 响应。
 
 | 天次 | 项目 | 核心产出 |
 |:---:|------|------|
@@ -265,6 +268,7 @@ linux-embedded-learning/
 | 35 | `device_gateway_state` | 设备状态管理模块：`DeviceState` 结构体封装设备状态、`device_state_get_status()` 生成状态字符串、`command.c` 通过状态模块获取 status 响应、命令解析与设备状态解耦 |
 | 36 | `device_gateway_led_state` | LED 状态管理：`pthread_mutex_lock`/`unlock` 保护 `g_device_state`、`led on`/`led off` 命令修改 `DeviceState.led_on`、`status` 命令查看 LED 状态、命令与设备状态的闭环联动 |
 | 37 | `device_gateway_dynamic_state` | 动态采样：`device_state_update_sample()` 每次 status 查询时更新 `DeviceState.temperature` 和 `voltage`、`rand()` 模拟传感器数据、为后续真实 ADC/I2C/sysfs 驱动读取预留接口 |
+| 38 | `device_gateway_response_code` | 统一响应格式：`RESP_OK`/`RESP_ERR` 响应宏、`code` 字段区分成功/错误类型、`msg` 字段携带描述信息、所有命令响应统一为 `OK code=0 msg=...` 或 `ERR code=XXXX msg=...` 格式 |
 
 ---
 
@@ -572,6 +576,18 @@ make run1
 make run2
 # 查看日志：cat logs/server.log
 ```
+
+# Day 38 — 设备网关统一响应格式（OK code=0 / ERR code=1001）
+
+```bash
+cd linux_projects/day38_device_gateway_response_code
+make
+# 终端 1：启动 server
+make run1
+# 终端 2：发送命令查看统一响应格式
+make run2
+# 查看日志：cat logs/server.log
+```
 ---
 
 ## 并行学习轨道
@@ -605,5 +621,5 @@ make run2
 ---
 
 <p align="center">
-  <sub>从编译选项到 epoll 高性能服务器 → 模块化架构重构 → 日志模块集成 → 配置文件管理 → 信号驱动的优雅退出 → 设备状态管理模块 → LED 状态管理 → 动态采样，37 天嵌入式 Linux C 系统编程学习计划圆满完成 🎉</sub>
+  <sub>从编译选项到 epoll 高性能服务器 → 模块化架构重构 → 日志模块集成 → 配置文件管理 → 信号驱动的优雅退出 → 设备状态管理模块 → LED 状态管理 → 动态采样 → 统一响应格式，38 天嵌入式 Linux C 系统编程学习计划圆满完成 🎉</sub>
 </p>
