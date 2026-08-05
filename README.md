@@ -26,14 +26,14 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 40 天。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 41 天。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll + 应用协议单线程命令服务器 → 项目结构重构：protocol / command / server / client 四模块分离 → 设备网关渐进式迭代（日志模块 → 配置文件 → 优雅退出 → 设备状态 → LED 状态管理 → 动态采样 → 统一响应格式与错误码）→ 项目整理与简历版收尾 → 开发板基础环境准备（串口 / USB 网络 / SSH / scp）。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll + 应用协议单线程命令服务器 → 项目结构重构：protocol / command / server / client 四模块分离 → 设备网关渐进式迭代（日志模块 → 配置文件 → 优雅退出 → 设备状态 → LED 状态管理 → 动态采样 → 统一响应格式与错误码）→ 项目整理与简历版收尾 → 开发板基础环境准备（串口 / USB 网络 / SSH / scp）→ 交叉编译入门：WSL 编译 ARM 程序并在 i.MX6ULL 开发板运行（打通嵌入式 Linux 最小闭环）。
 
 ---
 
@@ -82,7 +82,8 @@ linux-embedded-learning/
 │   ├── day37.md                         # 设备状态动态采样：模拟传感器数据
 │   ├── day38.md                         # 统一响应格式与错误码：code + msg 规范
 │   ├── day39.md                         # 项目整理与简历版收尾：文档化与可展示
-│   └── day40.md                         # 开发板基础环境准备：串口/USB网络/SSH/scp
+│   ├── day40.md                         # 开发板基础环境准备：串口/USB网络/SSH/scp
+│   └── day41.md                         # 交叉编译入门：WSL 编译 ARM 程序并在 i.MX6ULL 运行
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -124,7 +125,8 @@ linux-embedded-learning/
 │   ├── day37_device_gateway_dynamic_state/  # 设备网关 + 动态采样：模拟传感器
 │   ├── day38_device_gateway_response_code/  # 设备网关 + 统一响应格式与错误码
 │   ├── day39_device_gateway_final/        # 设备网关最终版：项目整理与简历版收尾
-│   └── day40_board_bringup/              # 开发板基础环境准备：串口/USB网络/SSH/scp
+│   ├── day40_board_bringup/              # 开发板基础环境准备：串口/USB网络/SSH/scp
+│   └── day41_cross_compile/              # 交叉编译入门：ARM 工具链，上板运行
 │
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
 │   ├── notes/                           # 笔记副本（day01~day25）
@@ -140,7 +142,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 已完成 40 天总览
+### 📅 已完成 41 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -184,6 +186,7 @@ linux-embedded-learning/
 | 38 | 统一响应格式与错误码 | 08-05 | `OK code=0 msg=...` / `ERR code=1001 msg=...`、数字错误码 |
 | 39 | 项目整理与简历版收尾 | 08-05 | 模块职责文档化、README、构建运行说明、嵌入式迁移指南 |
 | 40 | 开发板基础环境准备 | 08-05 | 串口登录、USB 网络、SSH 登录、`scp` 文件传输、野火 EBF6ULL S1 Pro |
+| 41 | 交叉编译入门 | 08-05 | `arm-linux-gnueabihf-gcc`、静态/动态链接、ELF 架构识别、glibc 版本兼容、scp 上板运行 |
 
 ---
 
@@ -299,6 +302,15 @@ linux-embedded-learning/
 | 40 | `board_bringup` | 开发板上板：串口登录（CH340, 115200 8N1）、USB RNDIS 网络、SSH 登录、`scp` 文件传输、野火 EBF6ULL S1 Pro (i.MX6ULL) |
 
 ---
+
+## Week 11：交叉编译 & 上板实战
+
+**目标**：打通嵌入式 Linux 应用开发的最小闭环 —— 在 WSL 主机编写 C 程序，使用 ARM 交叉编译器生成 ARM 可执行文件，通过 scp 上传到 i.MX6ULL 开发板并运行，理解交叉编译原理、动态/静态链接差异和 glibc 版本兼容性问题。
+
+| 天次 | 项目 | 核心产出 |
+|:---:|------|------|
+| 41 | `cross_compile` | ARM 交叉编译：`arm-linux-gnueabihf-gcc`、x86 vs ARM ELF 对比、动态链接 glibc 版本问题、静态链接上板运行、一键构建 x86/arm/arm_static 三目标 |
+
 
 ## 环境要求
 
@@ -604,6 +616,15 @@ make runse                 # 最终版 server：7 模块完整架构
 cd linux_projects/day40_board_bringup
 cat board_info.md          # 野火 EBF6ULL S1 Pro 上板记录
 cat hello_board.txt        # 通过 scp 传输到开发板的第一个文件
+n# Day 41 — 交叉编译入门（WSL 编译 ARM 程序并在 i.MX6ULL 运行）
+cd linux_projects/day41_cross_compile
+make                      # 一键编译 x86 / ARM / ARM 静态三版本
+file hello_x86            # ELF 64-bit, x86-64（PC 运行）
+file hello_arm            # ELF 32-bit, ARM（动态链接，需匹配 glibc）
+file hello_arm_static     # ELF 32-bit, ARM, 静态链接（推荐上板）
+./hello_x86               # 在 WSL 中运行 x86 版本
+# scp hello_arm_static debian@192.168.7.2:/home/debian/apps/day41_cross_compile/
+# 在开发板上：./hello_arm_static
 ```
 
 ---
@@ -642,5 +663,5 @@ cat hello_board.txt        # 通过 scp 传输到开发板的第一个文件
 ---
 
 <p align="center">
-  <sub>从编译选项到 epoll 高性能服务器 → 设备网关渐进式迭代 → 开发板上板，40 天学习计划已完成 🎉</sub>
+  <sub>从编译选项到 epoll 高性能服务器 → 设备网关渐进式迭代 → 开发板上板，41 天学习计划已完成 🎉</sub>
 </p>
