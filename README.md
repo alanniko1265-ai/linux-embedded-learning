@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议、多客户端协议服务器、设备网关模块化重构、日志模块集成、配置文件管理），最后通过模块化重构掌握真实嵌入式项目的工程结构，最终实现完整的设备网关服务器（模块化架构 + 日志 + 配置 + 优雅退出 + 设备状态管理 + LED 状态管理 + 动态采样 + 统一响应格式）。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议、多客户端协议服务器、设备网关模块化重构、日志模块集成、配置文件管理），最后通过模块化重构掌握真实嵌入式项目的工程结构，最终实现完整的设备网关服务器（模块化架构 + 日志 + 配置 + 安全关闭 + 设备状态管理 + LED 状态管理 + 动态采样 + 统一响应格式），并整理为可展示、可讲解、可迁移到开发板的最终 PC 版项目。
 
 ---
 
@@ -26,14 +26,14 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 38 天。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 39 天。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll 多客户端协议服务器 → 设备网关模块化重构 → 日志模块集成 → 配置文件管理 → 信号驱动的优雅退出 → 设备状态管理模块 → LED 状态管理模块 → 动态采样模块 → 统一响应格式与错误码模块。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll 多客户端协议服务器 → 设备网关模块化重构 → 日志模块集成 → 配置文件管理 → 信号驱动的安全关闭 → 设备状态管理模块 → LED 状态管理模块 → 动态采样模块 → 统一响应格式与错误码模块。
 
 ---
 
@@ -55,7 +55,7 @@ linux-embedded-learning/
 │   ├── day10.md                         # 文件属性：stat、权限位、类型识别、ls -l mode
 │   ├── day11.md                         # 目录遍历：opendir/readdir/closedir + stat
 │   ├── day12.md                         # 进程基础：fork + execvp + waitpid
-│   ├── day13.md                         # 信号处理：sigaction、SIGINT、优雅退出
+│   ├── day13.md                         # 信号处理：sigaction、SIGINT、安全关闭
 │   ├── day14.md                         # 日志模块：时间戳、分级日志、模块封装
 │   ├── day15.md                         # 非阻塞 IO：fcntl、O_NONBLOCK、EAGAIN
 │   ├── day16.md                         # /proc、/sys、/dev — 虚拟文件系统与设备文件
@@ -64,7 +64,7 @@ linux-embedded-learning/
 │   ├── day19.md                         # pthread 线程基础：创建、join、互斥锁
 │   ├── day20.md                         # 线程同步：生产者消费者队列（mutex + cond）
 │   ├── day21.md                         # IPC 基础：pipe 父子进程通信 + FIFO 命名管道
-│   ├── day22.md                         # 本地命令服务器：FIFO IPC + server 长期运行 + 信号优雅退出
+│   ├── day22.md                         # 本地命令服务器：FIFO IPC + server 长期运行 + 信号安全关闭
 │   ├── day23.md                         # TCP echo server：socket 编程、TCP 字节流、client/server 架构
 │   ├── day24.md                         # 多客户端 TCP server：pthread 每连接一线程
 │   ├── day25.md                         # select IO 多路复用：单线程管理多客户端
@@ -76,11 +76,12 @@ linux-embedded-learning/
 │   ├── day31.md                         # 设备网关项目结构重构：多文件模块化
 │   ├── day32.md                         # 设备网关加入日志模块：logger 模块集成
 │   ├── day33.md                         # 设备网关加入配置文件：config 模块 + gateway.conf
-│   └── day34.md                         # 设备网关优雅退出：信号处理 + EINTR + 资源清理
+│   └── day34.md                         # 设备网关安全关闭：信号处理 + EINTR + 资源清理
 │   └── day35.md                         # 设备网关状态管理：拆出 device_state 模块
 │   └── day36.md                         # 设备网关 LED 状态：led on/off 修改 DeviceState
 │   └── day37.md                         # 设备网关动态采样：status 触发 device_state_update_sample()
-│   └── day38.md                         # 设备网关统一响应：OK code=0 / ERR code=1001
+│   ├── day38.md                         # 设备网关统一响应：OK code=0 / ERR code=1001
+│   └── day39.md                         # 项目整理与简历版收尾：最终 PC 版项目
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -116,11 +117,12 @@ linux-embedded-learning/
 │   ├── day31_device_gateway_refactor/    # 设备网关重构：protocol/command/server/client 模块化
 │   ├── day32_device_gateway_logger/      # 设备网关日志模块：给已有服务增加 logger 模块
 │   ├── day33_device_gateway_config/      # 设备网关配置模块：config 文件解析 + gateway.conf
-│   └── day34_device_gateway_graceful_shutdown/  # 设备网关优雅退出：signal + EINTR + 资源清理
+│   └── day34_device_gateway_graceful_shutdown/  # 设备网关安全关闭：signal + EINTR + 资源清理
 │   └── day35_device_gateway_state/              # 设备网关状态管理：device_state 模块 + status 响应解耦
 │   └── day36_device_gateway_led_state/          # 设备网关 LED 状态：led on/off 命令修改 DeviceState
 │   └── day37_device_gateway_dynamic_state/       # 设备网关动态采样：temperature/voltage 模拟传感器更新
 │   └── day38_device_gateway_response_code/        # 设备网关统一响应：OK code=0 msg / ERR code=1001 msg
+│   └── day39_device_gateway_final/                # 设备网关最终版：可展示、可讲解、可迁移到开发板
 │
 ├── qt_projects/                         # Qt 嵌入式 HMI 项目（并行轨道）
 └── .gitignore
@@ -130,7 +132,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 已完成 38 天总览
+### 📅 已完成 39 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -146,7 +148,7 @@ linux-embedded-learning/
 | 10 | 文件属性 | 07-16 | `stat`, `struct stat`, `S_ISREG`, `S_ISDIR`, 权限位 |
 | 11 | 目录遍历 | 07-16 | `opendir`, `readdir`, `closedir`, `struct dirent` |
 | 12 | 进程管理 | 07-17 | `fork`, `execvp`, `waitpid`, `WIFEXITED`, `WEXITSTATUS` |
-| 13 | 信号处理 | 07-17 | `sigaction`, `SIGINT`, `sig_atomic_t`, 优雅退出 |
+| 13 | 信号处理 | 07-17 | `sigaction`, `SIGINT`, `sig_atomic_t`, 安全关闭 |
 | 14 | 日志模块 | 07-18 | `fopen`, `fprintf`, `strftime`, 多文件模块封装 |
 | 15 | 非阻塞 IO | 07-18 | `fcntl`, `F_GETFL`/`F_SETFL`, `O_NONBLOCK`, `EAGAIN` |
 | 16 | /proc、/sys、/dev | 07-20 | `/proc/cpuinfo`, `/proc/meminfo`, `/dev/null`, `/dev/zero` |
@@ -155,7 +157,7 @@ linux-embedded-learning/
 | 19 | pthread 线程基础 | 07-21 | `pthread_create`, `pthread_join`, `pthread_mutex_lock`/`unlock` |
 | 20 | 线程同步：生产者消费者队列 | 07-22 | `pthread_cond_wait`, `pthread_cond_signal`, 环形队列, 生产者消费者模型 |
 | 21 | IPC 基础：pipe 与 FIFO | 07-22 | `pipe`, `mkfifo`, `fork`, `read`/`write`, FIFO reader/writer |
-| 22 | 本地命令服务器 | 07-23 | FIFO IPC、server 长期运行、keep_fd 技巧、信号优雅退出、日志 |
+| 22 | 本地命令服务器 | 07-23 | FIFO IPC、server 长期运行、keep_fd 技巧、信号安全关闭、日志 |
 | 23 | TCP echo server | 07-23 | `socket`, `bind`, `listen`, `accept`, `send`/`recv`, TCP 字节流, client/server 架构 |
 | 24 | 多客户端 TCP server | 07-24 | `pthread_create`, `pthread_detach`, `malloc`/`free` 传参, 每连接一线程 |
 | 25 | select IO 多路复用 | 07-24 | `select`, `fd_set`, `FD_ZERO`/`FD_SET`/`FD_ISSET`, 单线程管理多客户端 |
@@ -167,11 +169,12 @@ linux-embedded-learning/
 | 31 | 设备网关项目结构重构 | 07-31 | protocol/command/server/client 模块化、头文件声明 vs 源文件实现、多文件 Makefile |
 | 32 | 设备网关加入日志模块 | 07-31 | logger 模块集成、给已有服务增加辅助模块、日志文件记录关键事件 |
 | 33 | 设备网关加入配置文件 | 08-03 | config 模块、gateway.conf 配置文件解析、server/client 共享配置 |
-| 34 | 设备网关优雅退出 | 08-03 | `sigaction`、`SIGINT`/`SIGTERM`、`volatile sig_atomic_t`、EINTR 处理、资源清理 |
+| 34 | 设备网关安全关闭 | 08-03 | `sigaction`、`SIGINT`/`SIGTERM`、`volatile sig_atomic_t`、EINTR 处理、资源清理 |
 | 35 | 设备网关状态管理 | 08-04 | `device_state` 模块、结构体封装、status 响应解耦、命令与状态分离 |
 | 36 | 设备网关 LED 状态管理 | 08-04 | `led_on`/`led_off` 修改 `DeviceState`、`pthread_mutex_lock` 保护共享状态、status 查看 LED |
 | 37 | 设备网关动态采样 | 08-04 | `device_state_update_sample()`、模拟 temperature/voltage 更新、为 ADC/I2C 传感器预留接口 |
 | 38 | 设备网关统一响应格式 | 08-04 | `OK code=0 msg`、`ERR code=1001 msg`、`RESP_OK`/`RESP_ERR` 宏、snprintf 格式化 |
+| 39 | 项目整理与简历版收尾 | 08-05 | 项目 README、模块职责梳理、构建运行说明、嵌入式开发板迁移方向、简历描述 |
 
 ---
 
@@ -219,7 +222,7 @@ linux-embedded-learning/
 
 | 天次 | 项目 | 核心产出 |
 |:---:|------|------|
-| 18 | `file_monitor_tool` | Week 2 综合项目：配置文件驱动、stat 监控文件变化、信号优雅退出 |
+| 18 | `file_monitor_tool` | Week 2 综合项目：配置文件驱动、stat 监控文件变化、信号安全关闭 |
 | 19 | `pthread_basic` | 多线程计数：`pthread_create`/`pthread_join`、`pthread_mutex_t` 保护共享变量 |
 | 20 | `thread_queue` | 线程安全环形队列：`pthread_cond_t` 条件变量、生产者消费者模型 |
 
@@ -230,7 +233,7 @@ linux-embedded-learning/
 | 天次 | 项目 | 核心产出 |
 |:---:|------|------|
 | 21 | `ipc_basic` | `pipe_demo`（父子进程 pipe 通信）+ `fifo_reader`/`fifo_writer`（独立进程 FIFO 通信）
-| 22 | `local_command_server` | 综合项目：FIFO IPC + server/client 架构 + `keep_fd` 技巧 + 信号优雅退出 + 日志 |
+| 22 | `local_command_server` | 综合项目：FIFO IPC + server/client 架构 + `keep_fd` 技巧 + 信号安全关闭 + 日志 |
 
 ## Week 6：IPC 综合项目
 
@@ -238,7 +241,7 @@ linux-embedded-learning/
 
 | 天次 | 项目 | 核心产出 |
 |:---:|------|------|
-| 22 | `local_command_server` | FIFO 命令通道、server 长期运行（keep_fd 技巧）、client 命令行参数拼接、SIGINT/SIGTERM 优雅退出、server 日志记录 |
+| 22 | `local_command_server` | FIFO 命令通道、server 长期运行（keep_fd 技巧）、client 命令行参数拼接、SIGINT/SIGTERM 安全关闭、server 日志记录 |
 
 ## Week 7：网络编程
 
@@ -264,11 +267,12 @@ linux-embedded-learning/
 | 31 | `device_gateway_refactor` | 设备网关模块化重构：拆分 protocol / command / server / client，理解头文件声明、源文件实现和多文件链接 |
 | 32 | `device_gateway_logger` | 日志模块集成：给已有服务增加独立的 logger 模块，运行时记录关键事件到日志文件 |
 | 33 | `device_gateway_config` | 配置文件管理：新增 config 模块解析 gateway.conf，server 和 client 共享同一份配置 |
-| 34 | `device_gateway_graceful_shutdown` | 信号驱动的优雅退出：`sigaction` 捕获 SIGINT/SIGTERM、`volatile sig_atomic_t` 标志位、`epoll_wait` EINTR 处理、`atexit` + 显式资源清理 |
+| 34 | `device_gateway_graceful_shutdown` | 信号驱动的安全关闭：`sigaction` 捕获 SIGINT/SIGTERM、`volatile sig_atomic_t` 标志位、`epoll_wait` EINTR 处理、`atexit` + 显式资源清理 |
 | 35 | `device_gateway_state` | 设备状态管理模块：`DeviceState` 结构体封装设备状态、`device_state_get_status()` 生成状态字符串、`command.c` 通过状态模块获取 status 响应、命令解析与设备状态解耦 |
 | 36 | `device_gateway_led_state` | LED 状态管理：`pthread_mutex_lock`/`unlock` 保护 `g_device_state`、`led on`/`led off` 命令修改 `DeviceState.led_on`、`status` 命令查看 LED 状态、命令与设备状态的闭环联动 |
 | 37 | `device_gateway_dynamic_state` | 动态采样：`device_state_update_sample()` 每次 status 查询时更新 `DeviceState.temperature` 和 `voltage`、`rand()` 模拟传感器数据、为后续真实 ADC/I2C/sysfs 驱动读取预留接口 |
 | 38 | `device_gateway_response_code` | 统一响应格式：`RESP_OK`/`RESP_ERR` 响应宏、`code` 字段区分成功/错误类型、`msg` 字段携带描述信息、所有命令响应统一为 `OK code=0 msg=...` 或 `ERR code=XXXX msg=...` 格式 |
+| 39 | `device_gateway_final` | 项目整理与收尾：完善项目 README、明确模块职责、补充构建与运行说明、整理命令与响应格式、嵌入式开发板迁移方向、简历描述提炼 |
 
 ---
 
@@ -339,7 +343,7 @@ make
 ./build/proc_runner /bin/ls data
 ./build/proc_runner /bin/echo hello linux
 
-# Day 13 — 信号守卫（按 Ctrl+C 触发优雅退出）
+# Day 13 — 信号守卫（按 Ctrl+C 触发安全关闭）
 cd linux_projects/day13_signal_guard
 make && ./build/signal_guard
 
@@ -395,7 +399,7 @@ make runw
 # Day 22 — 本地命令服务器（FIFO + 信号 + 日志综合项目）
 cd linux_projects/day22_local_command_server
 make
-# 终端 1：启动 server（长期运行，Ctrl+C 优雅退出）
+# 终端 1：启动 server（长期运行，Ctrl+C 安全关闭）
 make run
 # 终端 2：发送命令
 make send1      # 发送 "status"
@@ -530,10 +534,10 @@ make run2
 # 查看服务端日志
 cat logs/server.log
 
-# Day 34 — 设备网关优雅退出（signal + EINTR）
+# Day 34 — 设备网关安全关闭（signal + EINTR）
 cd linux_projects/day34_device_gateway_graceful_shutdown
 make
-# 终端 1：启动支持 Ctrl+C 优雅退出的 server
+# 终端 1：启动支持 Ctrl+C 安全关闭的 server
 make run1
 # 终端 2：启动 client
 make run2
@@ -588,6 +592,25 @@ make run1
 make run2
 # 查看日志：cat logs/server.log
 ```
+
+# Day 39 — 设备网关最终版（项目整理与简历收尾）
+
+```bash
+cd linux_projects/day39_device_gateway_final
+make
+# 终端 1：启动最终版 server（模块化架构 + 日志 + 配置 + 安全关闭 + 状态管理）
+make runse
+# 终端 2：启动 client 发送命令
+make runc
+# 或直接运行：
+./build/client status
+./build/client led on
+./build/client led off
+./build/client reboot device
+# 查看日志：cat logs/server.log
+# 查看项目 README（模块职责、命令格式、迁移方向）：
+cat README.md
+```
 ---
 
 ## 并行学习轨道
@@ -621,5 +644,5 @@ make run2
 ---
 
 <p align="center">
-  <sub>从编译选项到 epoll 高性能服务器 → 模块化架构重构 → 日志模块集成 → 配置文件管理 → 信号驱动的优雅退出 → 设备状态管理模块 → LED 状态管理 → 动态采样 → 统一响应格式，38 天嵌入式 Linux C 系统编程学习计划圆满完成 🎉</sub>
+  <sub>从编译选项到 epoll 高性能服务器 → 模块化架构重构 → 日志模块集成 → 配置文件管理 → 信号驱动的安全关闭 → 设备状态管理模块 → LED 状态管理 → 动态采样 → 统一响应格式 → 最终版项目整理，39 天嵌入式 Linux C 系统编程学习计划圆满完成 🎉</sub>
 </p>
