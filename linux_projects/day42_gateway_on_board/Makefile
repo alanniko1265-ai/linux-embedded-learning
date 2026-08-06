@@ -1,7 +1,7 @@
-cc := gcc
+cc := arm-linux-gnueabihf-gcc
 st := -Wall -g -O0 -Iinclude
-src1 := src/server.c src/protocol.c src/command.c src/logger.c
-src2 := src/client.c src/protocol.c
+src1 := src/server.c src/protocol.c src/command.c src/logger.c src/config.c src/device_state.c
+src2 := src/client.c src/protocol.c src/config.c 
 bu := build
 ta1 := $(bu)/server
 ta2 := $(bu)/client

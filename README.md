@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议），最后通过模块化重构掌握真实嵌入式项目的工程结构。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议、多客户端协议服务器、设备网关模块化重构、日志模块集成、配置文件管理），最后通过模块化重构掌握真实嵌入式项目的工程结构，最终实现完整的设备网关服务器（模块化架构 + 日志 + 配置 + 优雅退出）。
 
 ---
 
@@ -17,6 +17,8 @@
 - [Week 6：IPC 综合项目](#week-6ipc-综合项目)
 - [Week 7：网络编程](#week-7网络编程)
 - [Week 8：应用协议 & 综合实战](#week-8应用协议--综合实战)
+- [Week 9：功能迭代完善（笔记为主）](#week-9功能迭代完善笔记为主)
+- [Week 10：交叉编译与上板实战](#week-10交叉编译与上板实战)
 - [环境要求](#环境要求)
 - [快速开始](#快速开始)
 - [并行学习轨道](#并行学习轨道)
@@ -26,14 +28,14 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 41 天。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 42 天。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll + 应用协议单线程命令服务器 → 项目结构重构：protocol / command / server / client 四模块分离 → 设备网关渐进式迭代（日志模块 → 配置文件 → 优雅退出 → 设备状态 → LED 状态管理 → 动态采样 → 统一响应格式与错误码）→ 项目整理与简历版收尾 → 开发板基础环境准备（串口 / USB 网络 / SSH / scp）→ 交叉编译入门：WSL 编译 ARM 程序并在 i.MX6ULL 开发板运行（打通嵌入式 Linux 最小闭环）。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll 多客户端协议服务器 → 设备网关模块化重构 → 日志模块集成 → 配置文件管理 → 信号驱动的优雅退出 → 设备状态模块与 LED 控制 → 动态采样 → 统一响应格式与错误码 → 项目整理收尾 → i.MX6ULL 开发板环境搭建 → ARM 交叉编译（WSL → 开发板）→ 设备网关项目上板运行。
 
 ---
 
@@ -72,18 +74,19 @@ linux-embedded-learning/
 │   ├── day27.md                         # epoll IO 多路复用：epoll_create1/ctl/wait
 │   ├── day28.md                         # TCP 应用层协议：长度头 + payload
 │   ├── day29.md                         # TCP 请求-响应协议：send_exact/read_exact
-│   ├── day30.md                         # epoll + 请求-响应协议服务器（终章）
+│   ├── day30.md                         # epoll 多客户端请求-响应协议服务器
 │   ├── day31.md                         # 设备网关项目结构重构：多文件模块化
-│   ├── day32.md                         # 设备网关加入日志模块：logger 多文件集成
-│   ├── day33.md                         # 设备网关加入配置文件：key=value 解析
-│   ├── day34.md                         # 设备网关优雅退出：sigaction 信号处理
-│   ├── day35.md                         # 设备网关加入设备状态模块：command/state 分离
-│   ├── day36.md                         # 设备网关 LED 状态管理：状态持久化
-│   ├── day37.md                         # 设备状态动态采样：模拟传感器数据
-│   ├── day38.md                         # 统一响应格式与错误码：code + msg 规范
-│   ├── day39.md                         # 项目整理与简历版收尾：文档化与可展示
-│   ├── day40.md                         # 开发板基础环境准备：串口/USB网络/SSH/scp
-│   └── day41.md                         # 交叉编译入门：WSL 编译 ARM 程序并在 i.MX6ULL 运行
+│   ├── day32.md                         # 设备网关加入日志模块：logger 模块集成
+│   ├── day33.md                         # 设备网关加入配置文件：config 模块 + gateway.conf
+│   ├── day34.md                         # 设备网关优雅退出：信号处理 + EINTR + 资源清理
+│   ├── day35.md                         # 设备网关加入设备状态模块：DeviceState 独立模块
+│   ├── day36.md                         # 设备网关加入 LED 状态管理：led on/off 修改状态
+│   ├── day37.md                         # 设备状态动态采样：温度/电压模拟采样
+│   ├── day38.md                         # 统一响应格式与错误码：OK/ERR code msg
+│   ├── day39.md                         # 项目整理与简历版收尾：可展示的最终 PC 版
+│   ├── day40.md                         # 开发板基础环境准备：i.MX6ULL 串口/网络/文件传输
+│   ├── day41.md                         # 交叉编译入门：WSL 编译 ARM 程序并在开发板运行
+│   └── day42.md                         # 设备网关项目上板运行：Day39 项目部署到 i.MX6ULL
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -115,26 +118,12 @@ linux-embedded-learning/
 │   ├── day27_epoll_server/               # epoll IO 多路复用：Linux 高效事件通知
 │   ├── day28_tcp_protocol/               # TCP 应用层协议：粘包/拆包与长度头
 │   ├── day29_request_response/           # TCP 请求-响应协议：命令解析与响应
-│   ├── day30_epoll_protocol_server/      # epoll + 应用协议 — 单线程命令服务器
-│   └── day31_device_gateway_refactor/    # 设备网关重构：protocol/command/server/client 模块化
-│   ├── day32_device_gateway_logger/       # 设备网关 + 日志模块：logger 集成与文件写入
-│   ├── day33_device_gateway_config/       # 设备网关 + 配置文件：key=value 解析
-│   ├── day34_device_gateway_graceful_shutdown/  # 设备网关 + 信号优雅退出
-│   ├── day35_device_gateway_state/        # 设备网关 + 设备状态模块：状态结构体分离
-│   ├── day36_device_gateway_led_state/    # 设备网关 + LED 状态管理：状态持久化
-│   ├── day37_device_gateway_dynamic_state/  # 设备网关 + 动态采样：模拟传感器
-│   ├── day38_device_gateway_response_code/  # 设备网关 + 统一响应格式与错误码
-│   ├── day39_device_gateway_final/        # 设备网关最终版：项目整理与简历版收尾
-│   ├── day40_board_bringup/              # 开发板基础环境准备：串口/USB网络/SSH/scp
-│   └── day41_cross_compile/              # 交叉编译入门：ARM 工具链，上板运行
-│
-├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
-│   ├── notes/                           # 笔记副本（day01~day25）
-│   └── projects/                        # 项目副本（day01~day25）
+│   ├── day30_epoll_protocol_server/      # epoll 多客户端协议服务器
+│   ├── day31_device_gateway_refactor/    # 设备网关重构：protocol/command/server/client 模块化
+│   ├── day41_cross_compile/              # 交叉编译：ARM 工具链、hello_board 在 i.MX6ULL 运行
+│   └── day42_gateway_on_board/           # 设备网关上板：Day39 完整项目部署到 i.MX6ULL
 │
 ├── qt_projects/                         # Qt 嵌入式 HMI 项目（并行轨道）
-├── Linux_Embedded_App_Summer_Plan.md    # 暑期学习总体计划
-├── Qt_Linux_HMI_Plan_From_Day4.md       # Qt / Linux HMI 专项路线图
 └── .gitignore
 ```
 
@@ -142,7 +131,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 已完成 41 天总览
+### 📅 已完成 42 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -175,18 +164,19 @@ linux-embedded-learning/
 | 27 | epoll IO 多路复用 | 07-27 | `epoll_create1`, `epoll_ctl`, `epoll_wait`, `EPOLLIN` |
 | 28 | TCP 应用层协议 | 07-28 | `uint32_t`, `htonl`, `ntohl`, `length + payload`, `read_exact` |
 | 29 | TCP 请求-响应协议 | 07-29 | `send_exact`, `read_exact`, `send_message`, `read_message`, 命令响应 |
-| 30 | epoll + 请求-响应协议 | 07-30 | `epoll` + `length+payload` + 请求-响应, 单线程命令服务器 |
+| 30 | epoll 多客户端协议服务器 | 07-30 | `epoll_wait`, `EPOLL_CTL_ADD`, `send_exact`, `read_message`, 多客户端请求-响应 |
 | 31 | 设备网关项目结构重构 | 07-31 | protocol/command/server/client 模块化、头文件声明 vs 源文件实现、多文件 Makefile |
-| 32 | 设备网关 + 日志模块 | 08-01 | `logger` 模块集成、`fprintf` + `fflush`、时间戳日志、`logs/` 目录 |
-| 33 | 设备网关 + 配置文件 | 08-02 | `config/gateway.conf`、key=value 解析、`GatewayConfig` 结构体 |
-| 34 | 设备网关 + 优雅退出 | 08-03 | `sigaction`、`SIGINT`/`SIGTERM`、`g_running` 标志位、资源清理 |
-| 35 | 设备网关 + 设备状态模块 | 08-04 | `device_state` 模块、`DeviceState` 结构体、command/state 关注点分离 |
-| 36 | 设备网关 + LED 状态管理 | 08-04 | `led on`/`led off` 状态持久化、`status` 查询实时 LED 状态 |
-| 37 | 设备网关 + 动态采样 | 08-04 | `device_state_update_sample()`、模拟温度/电压、ADC/I2C 接口预留 |
-| 38 | 统一响应格式与错误码 | 08-05 | `OK code=0 msg=...` / `ERR code=1001 msg=...`、数字错误码 |
-| 39 | 项目整理与简历版收尾 | 08-05 | 模块职责文档化、README、构建运行说明、嵌入式迁移指南 |
-| 40 | 开发板基础环境准备 | 08-05 | 串口登录、USB 网络、SSH 登录、`scp` 文件传输、野火 EBF6ULL S1 Pro |
-| 41 | 交叉编译入门 | 08-05 | `arm-linux-gnueabihf-gcc`、静态/动态链接、ELF 架构识别、glibc 版本兼容、scp 上板运行 |
+| 32 | 设备网关加入日志模块 | 07-31 | logger 模块集成、给已有服务增加辅助模块、日志文件记录关键事件 |
+| 33 | 设备网关加入配置文件 | 08-03 | config 模块、gateway.conf 配置文件解析、server/client 共享配置 |
+| 34 | 设备网关优雅退出 | 08-03 | `sigaction`、`SIGINT`/`SIGTERM`、`volatile sig_atomic_t`、EINTR 处理、资源清理 |
+| 35 | 设备状态模块 | 08-04 | `DeviceState` 独立模块、`DeviceState_GetString`、去硬编码 |
+| 36 | LED 状态管理 | 08-04 | `DeviceState_SetLed`、`led on/off` 命令修改状态、`status` 可见 LED 变化 |
+| 37 | 设备状态动态采样 | 08-04 | `DeviceState_Sample`、温度/电压模拟采样、每次 status 查询动态更新 |
+| 38 | 统一响应格式与错误码 | 08-04 | `OK code msg` / `ERR code msg` 格式、错误码枚举、`Response` 结构体 |
+| 39 | 项目整理与收尾 | 08-05 | 最终 PC 版项目整理、README 文档、可展示可讲解可迁移 |
+| 40 | 开发板基础环境准备 | 08-05 | i.MX6ULL 串口连接、网络配置、`scp`/`nfs` 文件传输、SDK 部署 |
+| 41 | ARM 交叉编译入门 | 08-05 | `arm-linux-gnueabihf-gcc`、`-static` 静态链接、hello_board 上板运行 |
+| 42 | 设备网关项目上板 | 08-06 | Day39 完整项目交叉编译 + 部署到 i.MX6ULL、开发板运行设备网关 |
 
 ---
 
@@ -269,48 +259,41 @@ linux-embedded-learning/
 
 ## Week 8：应用协议 & 综合实战
 
-**目标**：在 TCP 网络编程基础上，深入理解 TCP 字节流的粘包/拆包问题，设计并实现应用层协议（length + payload），最终将 epoll 高性能 IO 多路复用与应用协议结合，构建单线程多客户端命令服务器。
+**目标**：在 TCP 网络编程基础上，深入理解 TCP 字节流的粘包/拆包问题，设计并实现应用层协议（length + payload），最终将 epoll 高性能 IO 多路复用与应用协议结合，构建单线程多客户端命令服务器，并通过模块化重构、日志集成和配置管理掌握真实嵌入式项目的工程结构。
 
 | 天次 | 项目 | 核心产出 |
 |:---:|------|------|
 | 28 | `tcp_protocol` | TCP 应用层协议：4 字节长度头 + payload，解决 TCP 字节流消息边界问题 |
 | 29 | `request_response` | TCP 请求-响应协议：client 发送命令，server 解析并返回响应，使用 `send_exact`/`read_exact` 保证完整收发 |
-| 30 | `epoll_protocol_server` | 终章综合项目：epoll 单线程 + length+payload 协议 + 请求-响应模型，构建高性能多客户端命令服务器 |
-| 31 | `device_gateway_refactor` | 项目结构重构：拆分为 protocol / command / server / client 四模块，理解头文件声明与源文件实现分离、多文件 Makefile 链接 |
+| 30 | `epoll_protocol_server` | epoll 多客户端请求-响应协议服务器：单线程管理多个 client，每个 client 使用 `length + payload` 协议发送命令并接收响应 |
+| 31 | `device_gateway_refactor` | 设备网关模块化重构：拆分 protocol / command / server / client，理解头文件声明、源文件实现和多文件链接 |
+| 32 | `device_gateway_logger` | 日志模块集成：给已有服务增加独立的 logger 模块，运行时记录关键事件到日志文件 |
+| 33 | `device_gateway_config` | 配置文件管理：新增 config 模块解析 gateway.conf，server 和 client 共享同一份配置 |
+| 34 | `device_gateway_graceful_shutdown` | 信号驱动的优雅退出：`sigaction` 捕获 SIGINT/SIGTERM、`volatile sig_atomic_t` 标志位、`epoll_wait` EINTR 处理、`atexit` + 显式资源清理 |
 
-## Week 9：设备网关渐进式迭代
+## Week 9：功能迭代完善（笔记为主）
 
-**目标**：在模块化设备网关基础上，以渐进式工程迭代的方式逐日添加生产级能力 —— 日志记录、配置文件驱动、信号优雅退出、设备状态管理、LED 状态持久化、动态采样、统一响应格式与错误码。每一天都是在前一天基础上的增量改进，模拟真实嵌入式项目的迭代开发流程。
-
-| 天次 | 项目 | 核心产出 |
-|:---:|------|------|
-| 32 | `device_gateway_logger` | 新增 `logger` 模块：`logger_init`/`logger_info`/`logger_error`/`logger_close`、时间戳日志、`fprintf` + `fflush` 即时落盘 |
-| 33 | `device_gateway_config` | 新增 `config` 模块：`config/gateway.conf` 配置文件、`fgets`+`sscanf` 解析 key=value、`GatewayConfig` 结构体 |
-| 34 | `device_gateway_graceful_shutdown` | 新增信号处理：`sigaction` 注册 `SIGINT`/`SIGTERM`、`volatile sig_atomic_t g_running` 标志位、`EINTR` 中断 `epoll_wait`、资源清理 |
-| 35 | `device_gateway_state` | 新增 `device_state` 模块：`DeviceState` 结构体、`device_state_get_status()`、command 层与 state 层关注点分离 |
-| 36 | `device_gateway_led_state` | LED 状态持久化：`led on`/`led off` 命令真正修改 `DeviceState.led_on`、`status` 查询实时 LED 状态 |
-| 37 | `device_gateway_dynamic_state` | 动态采样：`device_state_update_sample()` 模拟温度/电压变化、为 ADC/I2C/驱动节点读取预留接口 |
-| 38 | `device_gateway_response_code` | 统一响应格式：`OK code=0 msg=...` / `ERR code=1001 msg=...`、数字错误码、机器可解析响应规范 |
-
-## Week 10：项目整理 & 开发板上板
-
-**目标**：将 Week 9 迭代完成的设备网关整理为可展示的项目成果，并完成从 PC/WSL 到真实 ARM 嵌入式 Linux 开发板的最小上板链路打通。
+**目标**：在设备网关核心架构基础上，逐步完善设备状态管理、LED 控制、动态采样、统一响应格式，最后整理出可展示、可讲解、可迁移到开发板的最终 PC 版项目。
 
 | 天次 | 项目 | 核心产出 |
 |:---:|------|------|
-| 39 | `device_gateway_final` | 项目整理：7 模块架构文档、README、命令与响应格式规范、构建与运行说明、嵌入式开发板迁移路线图 |
-| 40 | `board_bringup` | 开发板上板：串口登录（CH340, 115200 8N1）、USB RNDIS 网络、SSH 登录、`scp` 文件传输、野火 EBF6ULL S1 Pro (i.MX6ULL) |
+| 35 | `device_state` 模块 | `DeviceState` 独立模块、`DeviceState_GetString` 去硬编码、status 动态拼接 |
+| 36 | `led_state` LED 控制 | `DeviceState_SetLed`、`led on/off` 命令真正修改状态、status 可见 LED 变化 |
+| 37 | `dynamic_state` 动态采样 | `DeviceState_Sample` 温度/电压每次 status 查询时动态更新 |
+| 38 | `response_code` 统一响应 | `OK 0 msg` / `ERR code msg` 格式、错误码枚举、`Response` 结构体封装 |
+| 39 | `gateway_final` 项目整理 | 最终 PC 版项目 README、代码清理、可展示可讲解可迁移 |
+| 40 | `board_bringup` 开发板环境 | i.MX6ULL 串口连接（PuTTY/minicom）、网络配置（IP/路由）、`scp`/`nfs` 文件传输、ARM SDK 部署 |
+
+## Week 10：交叉编译与上板实战
+
+**目标**：打通嵌入式 Linux 应用开发的完整链路 —— 在 WSL/PC 上交叉编译 ARM 程序，部署到 i.MX6ULL 开发板运行，将 Day39 设备网关完整项目成功上板。
+
+| 天次 | 项目 | 核心产出 |
+|:---:|------|------|
+| 41 | `cross_compile` 交叉编译 | `arm-linux-gnueabihf-gcc` 工具链、`-static` 静态链接避免库依赖、`hello_board` 上板闭环 |
+| 42 | `gateway_on_board` 网关上板 | Day39 完整设备网关项目交叉编译 + `scp` 部署到 i.MX6ULL + 开发板运行 server/client |
 
 ---
-
-## Week 11：交叉编译 & 上板实战
-
-**目标**：打通嵌入式 Linux 应用开发的最小闭环 —— 在 WSL 主机编写 C 程序，使用 ARM 交叉编译器生成 ARM 可执行文件，通过 scp 上传到 i.MX6ULL 开发板并运行，理解交叉编译原理、动态/静态链接差异和 glibc 版本兼容性问题。
-
-| 天次 | 项目 | 核心产出 |
-|:---:|------|------|
-| 41 | `cross_compile` | ARM 交叉编译：`arm-linux-gnueabihf-gcc`、x86 vs ARM ELF 对比、动态链接 glibc 版本问题、静态链接上板运行、一键构建 x86/arm/arm_static 三目标 |
-
 
 ## 环境要求
 
@@ -523,7 +506,7 @@ make run1
 # 终端 2：启动 request-response client
 make run2
 
-# Day 30 — epoll + 应用协议单线程命令服务器（终章）
+# Day 30 — epoll 多客户端请求-响应协议服务器
 cd linux_projects/day30_epoll_protocol_server
 make
 # 终端 1：启动 epoll 多客户端协议 server
@@ -546,85 +529,58 @@ make runc
 ./build/client status
 ./build/client led on
 ./build/client reboot
-```
 
-```bash
-# === Week 9 ===
-# Day 32 — 设备网关 + 日志模块（logger 集成 + 文件写入）
+# Day 32 — 设备网关加入日志模块（logger 模块集成）
 cd linux_projects/day32_device_gateway_logger
 make
-# 终端 1：启动 server（事件写入 logs/server.log）
+# 终端 1：启动带日志功能的 server
 make runse
-# 终端 2：发送命令
+# 终端 2：启动 client 发送命令
+make runc
+# 或直接运行：
 ./build/client status
 ./build/client led on
+./build/client reboot device
 # 查看日志：cat logs/server.log
 
-# Day 33 — 设备网关 + 配置文件（端口/设备名/日志路径可配置）
+# Day 33 — 设备网关加入配置文件（config 模块）
 cd linux_projects/day33_device_gateway_config
 make
-# 编辑 config/gateway.conf 修改端口、设备名、日志路径
-make runse     # server 读取配置启动
-make runc      # client 读取配置连接
+# 终端 1：启动读取配置的 server
+make run1
+# 终端 2：启动读取同一配置的 client
+make run2
+# 查看服务端日志
+cat logs/server.log
 
-# Day 34 — 设备网关 + 优雅退出（Ctrl+C 安全关闭）
+# Day 34 — 设备网关优雅退出（signal + EINTR）
 cd linux_projects/day34_device_gateway_graceful_shutdown
 make
-make runse     # server 启动，按 Ctrl+C 触发优雅退出流程
-# 观察日志中 "server stopped" 与资源清理记录
+# 终端 1：启动支持 Ctrl+C 优雅退出的 server
+make run1
+# 终端 2：启动 client
+make run2
+# 回到终端 1 按 Ctrl+C，再查看日志
+cat logs/server.log
 
-# Day 35 — 设备网关 + 设备状态模块（command/state 分离）
-cd linux_projects/day35_device_gateway_state
-make
-make runse     # status 命令现在由 device_state 模块生成响应
-./build/client status
-
-# Day 36 — 设备网关 + LED 状态持久化
-cd linux_projects/day36_device_gateway_led_state
-make
-make runse
-./build/client led on     # LED 状态写入 DeviceState
-./build/client status      # status 读取到 led=on
-./build/client led off
-./build/client status      # status 读取到 led=off
-
-# Day 37 — 设备网关 + 动态采样（温度/电压模拟变化）
-cd linux_projects/day37_device_gateway_dynamic_state
-make
-make runse
-./build/client status      # temp=32 voltage=24
-./build/client status      # temp=33 voltage=25（每次查询动态更新）
-
-# Day 38 — 设备网关 + 统一响应格式与错误码
-cd linux_projects/day38_device_gateway_response_code
-make
-make runse
-./build/client status      # OK code=0 msg=status device=... temp=... voltage=...
-./build/client unknown_cmd  # ERR code=1001 msg=unknown_command
-
-# === Week 10 ===
-# Day 39 — 设备网关最终版（整理文档化 + 简历版收尾）
-cd linux_projects/day39_device_gateway_final
-make
-make runse                 # 最终版 server：7 模块完整架构
-./build/client status
-./build/client led on
-./build/client reboot
-# 查看项目 README：cat README.md
-
-# Day 40 — 开发板基础环境准备（文档）
-cd linux_projects/day40_board_bringup
-cat board_info.md          # 野火 EBF6ULL S1 Pro 上板记录
-cat hello_board.txt        # 通过 scp 传输到开发板的第一个文件
-n# Day 41 — 交叉编译入门（WSL 编译 ARM 程序并在 i.MX6ULL 运行）
+# === Week 10：交叉编译与上板 ===
+# Day 41 — ARM 交叉编译（WSL → i.MX6ULL）
 cd linux_projects/day41_cross_compile
-make                      # 一键编译 x86 / ARM / ARM 静态三版本
-file hello_x86            # ELF 64-bit, x86-64（PC 运行）
-file hello_arm            # ELF 32-bit, ARM（动态链接，需匹配 glibc）
-file hello_arm_static     # ELF 32-bit, ARM, 静态链接（推荐上板）
-./hello_x86               # 在 WSL 中运行 x86 版本
-# scp hello_arm_static debian@192.168.7.2:/home/debian/apps/day41_cross_compile/
-# 在开发板上：./hello_arm_static
+make                    # 用 arm-linux-gnueabihf-gcc 交叉编译
+file hello_arm          # 确认是 ARM 可执行文件
+# scp hello_arm_static root@<开发板IP>:/tmp/
+# 在开发板上：/tmp/hello_arm_static
+
+# Day 42 — 设备网关项目上板运行
+cd linux_projects/day42_gateway_on_board
+cat README.md           # 查看完整的编译和部署说明
+make                    # 交叉编译
+# scp build/gateway_server build/gateway_client root@<开发板IP>:/tmp/
+# 在开发板上：
+#   终端1：/tmp/gateway_server
+#   终端2：/tmp/gateway_client status
+#          /tmp/gateway_client led on
+#          /tmp/gateway_client reboot
 ```
 
 ---
@@ -637,11 +593,9 @@ file hello_arm_static     # ELF 32-bit, ARM, 静态链接（推荐上板）
 
 从 Day 4 开始并行的 Qt/C++ 学习线，面向嵌入式 Linux HMI 应用开发。涵盖 Qt Widgets、信号与槽、串口通信、TCP 客户端、多线程 Worker 等。
 
-详见 [Qt_Linux_HMI_Plan_From_Day4.md](./Qt_Linux_HMI_Plan_From_Day4.md)
+### 学习笔记（`notes/`）
 
-### 学习笔记镜像（`linux-learning-notes/`）
-
-笔记与项目的完整镜像副本，保持与主目录同步更新。
+每日学习笔记，记录目标清单、命令实践、概念讲解、踩坑记录和学习总结。
 
 ---
 
@@ -657,11 +611,10 @@ file hello_arm_static     # ELF 32-bit, ARM, 静态链接（推荐上板）
 
 ## 相关文档
 
-- **[Linux_Embedded_App_Summer_Plan.md](./Linux_Embedded_App_Summer_Plan.md)** — 暑期学习总体计划
-- **[Qt_Linux_HMI_Plan_From_Day4.md](./Qt_Linux_HMI_Plan_From_Day4.md)** — Qt / Linux HMI 专项路线图
+- **[Qt_Linux_HMI_Plan_From_Day4.md](./Qt_Linux_HMI_Plan_From_Day4.md)** — Qt / Linux HMI 专项路线图（即将更新）
 
 ---
 
 <p align="center">
-  <sub>从编译选项到 epoll 高性能服务器 → 设备网关渐进式迭代 → 开发板上板，41 天学习计划已完成 🎉</sub>
+  <sub>从编译选项到 epoll 高性能服务器 → 模块化架构重构 → 日志/配置/信号模块集成 → 设备状态与 LED 控制 → 动态采样 → 统一响应码 → 项目整理 → i.MX6ULL 开发板环境搭建 → ARM 交叉编译 → 设备网关完整项目上板运行，42 天嵌入式 Linux C 系统编程学习计划圆满完成 🎉</sub>
 </p>
