@@ -38,6 +38,11 @@ temp_repo/
 logs/
 *.log
 
+# 交叉编译产物（无后缀 ELF）
+linux_projects/day41_cross_compile/hello_arm
+linux_projects/day41_cross_compile/hello_arm_static
+linux_projects/day41_cross_compile/hello_x86
+
 # linux-learning-notes 镜像 — 同样忽略编译产物
 linux-learning-notes/projects/*/build/
 linux-learning-notes/projects/*/hello*
