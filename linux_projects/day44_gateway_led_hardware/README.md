@@ -1,4 +1,4 @@
-# Embedded Linux Device Gateway
+# Day 44 — Embedded Linux Device Gateway
 
 ## 项目简介
 
@@ -6,7 +6,7 @@
 
 项目模拟一个嵌入式网关服务：客户端可以查询设备状态、控制 LED 状态、发送重启命令；服务端负责维护设备状态、记录运行日志、读取配置文件，并支持基于 SIGINT / SIGTERM 的服务退出处理与资源释放。
 
-该项目当前运行在 WSL / Ubuntu 环境，后续可迁移到嵌入式 Linux 开发板，通过交叉编译部署，并将软件 LED 状态替换为真实 GPIO 控制。
+当前 Day 44 仍然使用软件状态表示 LED，尚未直接写入 sysfs 或 GPIO。目录中的 led_control.h 和 led_control.c 是尚未完成的接口草稿，当前也没有接入 server 的构建目标。Day 43 的 ledctl 已经验证了通过 Linux LED 子系统控制真实 LED 的链路，后续可以把这部分逻辑封装到本项目的 device_state 模块中。
 
 ## 核心功能
 
@@ -24,11 +24,12 @@
 ## 项目结构
 
 ```text
-day39_device_gateway_final/
+day44_gateway_led_hardware/
 ├── include/
 │   ├── command.h
 │   ├── config.h
 │   ├── device_state.h
+│   ├── led_control.h
 │   ├── logger.h
 │   └── protocol.h
 ├── src/
@@ -36,6 +37,7 @@ day39_device_gateway_final/
 │   ├── command.c
 │   ├── config.c
 │   ├── device_state.c
+│   ├── led_control.c
 │   ├── logger.c
 │   ├── protocol.c
 │   └── server.c
@@ -64,7 +66,7 @@ day39_device_gateway_final/
 ### 编译项目
 
 ```bash
-cd /mnt/c/Users/20858/Documents/实习/linux_projects/day39_device_gateway_final
+cd /mnt/c/Users/20858/Documents/实习/linux_projects/day44_gateway_led_hardware
 make clean
 make
 ```

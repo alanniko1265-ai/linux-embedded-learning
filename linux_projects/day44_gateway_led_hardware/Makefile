@@ -1,7 +1,7 @@
 cc := /home/anllenge/toolchains/gcc-arm-8.3-2019.03-x86_64-arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc
 st := -Wall -g -O0 -Iinclude
-src1 := src/server.c src/protocol.c src/command.c src/logger.c src/config.c src/device_state.c
-src2 := src/client.c src/protocol.c src/config.c 
+src1 := src/server.c src/protocol.c src/command.c src/logger.c src/config.c src/device_state.c src/led_control.c
+src2 := src/client.c src/protocol.c src/config.c
 bu := build
 ta1 := $(bu)/server
 ta2 := $(bu)/client

@@ -1,6 +1,6 @@
 cc := /home/anllenge/toolchains/gcc-arm-8.3-2019.03-x86_64-arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc
 ta := ledctl
-st := -Wall -g -O0 
+st := -Wall -g -O0
 src := src/main.c
 all:$(ta)
 $(ta):$(src)

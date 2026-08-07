@@ -22,4 +22,4 @@ void device_state_update_sample(struct DeviceState *state){
     state->temperature=32+(sample_count %3);
     state->voltage=24+(sample_count%2);
     sample_count++;
-}   
+}
