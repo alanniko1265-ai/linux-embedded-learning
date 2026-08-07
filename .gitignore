@@ -42,6 +42,16 @@ logs/
 linux_projects/day41_cross_compile/hello_arm
 linux_projects/day41_cross_compile/hello_arm_static
 linux_projects/day41_cross_compile/hello_x86
+linux_projects/day43_led_control/ledctl
+linux_projects/day43_led_control/ledctl_x86
+linux_projects/day45_key_input/key_monitor
+
+# 测试数据文件（运行时生成）
+linux_projects/day08_file_io/data/*.txt
+
+# 临时目录
+repo_tmp/
+wechat_chat_converter/
 
 # linux-learning-notes 镜像 — 同样忽略编译产物
 linux-learning-notes/projects/*/build/
