@@ -28,14 +28,14 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 42 天。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 43 天。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll 多客户端协议服务器 → 设备网关模块化重构 → 日志模块集成 → 配置文件管理 → 信号驱动的优雅退出 → 设备状态模块与 LED 控制 → 动态采样 → 统一响应格式与错误码 → 项目整理收尾 → i.MX6ULL 开发板环境搭建 → ARM 交叉编译（WSL → 开发板）→ 设备网关项目上板运行。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll 多客户端协议服务器 → 设备网关模块化重构 → 日志模块集成 → 配置文件管理 → 信号驱动的优雅退出 → 设备状态模块与 LED 控制 → 动态采样 → 统一响应格式与错误码 → 项目整理收尾 → i.MX6ULL 开发板环境搭建 → ARM 交叉编译（WSL → 开发板）→ 设备网关项目上板运行 → LED sysfs 控制：C 程序通过 /sys/class/leds 控制开发板硬件 LED。
 
 ---
 
@@ -86,7 +86,8 @@ linux-embedded-learning/
 │   ├── day39.md                         # 项目整理与简历版收尾：可展示的最终 PC 版
 │   ├── day40.md                         # 开发板基础环境准备：i.MX6ULL 串口/网络/文件传输
 │   ├── day41.md                         # 交叉编译入门：WSL 编译 ARM 程序并在开发板运行
-│   └── day42.md                         # 设备网关项目上板运行：Day39 项目部署到 i.MX6ULL
+│   ├── day42.md                         # 设备网关项目上板运行：Day39 项目部署到 i.MX6ULL
+│   └── day43.md                         # LED 控制：通过 sysfs 操作开发板硬件 LED
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -121,7 +122,8 @@ linux-embedded-learning/
 │   ├── day30_epoll_protocol_server/      # epoll 多客户端协议服务器
 │   ├── day31_device_gateway_refactor/    # 设备网关重构：protocol/command/server/client 模块化
 │   ├── day41_cross_compile/              # 交叉编译：ARM 工具链、hello_board 在 i.MX6ULL 运行
-│   └── day42_gateway_on_board/           # 设备网关上板：Day39 完整项目部署到 i.MX6ULL
+│   ├── day42_gateway_on_board/           # 设备网关上板：Day39 完整项目部署到 i.MX6ULL
+│   └── day43_led_control/                # LED 控制：通过 sysfs 控制 i.MX6ULL 开发板 LED
 │
 ├── qt_projects/                         # Qt 嵌入式 HMI 项目（并行轨道）
 └── .gitignore
@@ -131,7 +133,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 已完成 42 天总览
+### 📅 已完成 43 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -175,6 +177,7 @@ linux-embedded-learning/
 | 38 | 统一响应格式与错误码 | 08-04 | `OK code msg` / `ERR code msg` 格式、错误码枚举、`Response` 结构体 |
 | 39 | 项目整理与收尾 | 08-05 | 最终 PC 版项目整理、README 文档、可展示可讲解可迁移 |
 | 40 | 开发板基础环境准备 | 08-05 | i.MX6ULL 串口连接、网络配置、`scp`/`nfs` 文件传输、SDK 部署 |
+| 43 | LED 控制：sysfs 操作硬件 | 08-06 | `open`/`write`/`close` 操作 `/sys/class/leds/*/brightness`、`ledctl` CLI 工具 |
 | 41 | ARM 交叉编译入门 | 08-05 | `arm-linux-gnueabihf-gcc`、`-static` 静态链接、hello_board 上板运行 |
 | 42 | 设备网关项目上板 | 08-06 | Day39 完整项目交叉编译 + 部署到 i.MX6ULL、开发板运行设备网关 |
 
@@ -289,6 +292,7 @@ linux-embedded-learning/
 **目标**：打通嵌入式 Linux 应用开发的完整链路 —— 在 WSL/PC 上交叉编译 ARM 程序，部署到 i.MX6ULL 开发板运行，将 Day39 设备网关完整项目成功上板。
 
 | 天次 | 项目 | 核心产出 |
+| 43 | `led_control` LED 控制 | C 程序通过 sysfs（`/sys/class/leds/*/brightness`）控制 i.MX6ULL 开发板 LED、`ledctl` 命令行工具 |
 |:---:|------|------|
 | 41 | `cross_compile` 交叉编译 | `arm-linux-gnueabihf-gcc` 工具链、`-static` 静态链接避免库依赖、`hello_board` 上板闭环 |
 | 42 | `gateway_on_board` 网关上板 | Day39 完整设备网关项目交叉编译 + `scp` 部署到 i.MX6ULL + 开发板运行 server/client |
@@ -583,6 +587,18 @@ make                    # 交叉编译
 #          /tmp/gateway_client reboot
 ```
 
+
+# Day 43 — LED 控制：通过 sysfs 操作开发板硬件 LED
+cd linux_projects/day43_led_control
+# 在 x86 PC 上测试（模拟）：
+./ledctl_x86 red on     # 点亮红色 LED（模拟 sysfs 路径）
+./ledctl_x86 red off    # 关闭红色 LED
+./ledctl_x86 status     # 查看 LED 状态
+# 在 i.MX6ULL 开发板上运行（操作真实硬件）：
+# ./ledctl red on       # 写入 /sys/class/leds/red/brightness = 1
+# ./ledctl red off      # 写入 /sys/class/leds/red/brightness = 0
+# ./ledctl status       # 读取所有 LED brightness 值
+```
 ---
 
 ## 并行学习轨道
@@ -616,5 +632,5 @@ make                    # 交叉编译
 ---
 
 <p align="center">
-  <sub>从编译选项到 epoll 高性能服务器 → 模块化架构重构 → 日志/配置/信号模块集成 → 设备状态与 LED 控制 → 动态采样 → 统一响应码 → 项目整理 → i.MX6ULL 开发板环境搭建 → ARM 交叉编译 → 设备网关完整项目上板运行，42 天嵌入式 Linux C 系统编程学习计划圆满完成 🎉</sub>
+  <sub>从编译选项到 epoll 高性能服务器 → 模块化架构重构 → 日志/配置/信号模块集成 → 设备状态与 LED 控制 → 动态采样 → 统一响应码 → 项目整理 → i.MX6ULL 开发板环境搭建 → ARM 交叉编译 → 设备网关完整项目上板运行，43 天嵌入式 Linux C 系统编程学习计划圆满完成 🎉</sub>
 </p>
