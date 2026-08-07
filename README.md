@@ -2,7 +2,7 @@
 
 > 从 Linux C 基础出发，逐步学习构建系统、系统调用、并发、网络编程、嵌入式网关、ARM 交叉编译和开发板硬件控制。
 
-当前学习进度：**Day 44**
+当前学习进度：**Day 45**
 
 最后整理：**2026-08-07**
 
@@ -14,6 +14,7 @@
 - [学习路线](#学习路线)
 - [Day 43：通过 sysfs 控制开发板 LED](#day-43通过-sysfs-控制开发板-led)
 - [Day 44：设备网关与 LED 硬件扩展](#day-44设备网关与-led-硬件扩展)
+- [Day 45：按键输入读取 input event 并控制 LED](#day-45按键输入读取-input-event-并控制-led)
 - [开发环境](#开发环境)
 - [项目规范](#项目规范)
 - [后续计划](#后续计划)
@@ -24,8 +25,8 @@
 
 | 内容 | 位置 | 当前状态 |
 | --- | --- | --- |
-| 每日学习笔记 | [notes/](./notes) | Day 01–43 |
-| Linux C 项目 | [linux_projects/](./linux_projects) | Day 01–31、35–44，共 41 个项目目录 |
+| 每日学习笔记 | [notes/](./notes) | Day 01–45 |
+| Linux C 项目 | [linux_projects/](./linux_projects) | Day 01–31、35–45，共 42 个项目目录 |
 | Qt 并行学习 | [qt_projects/](./qt_projects) | 已建立 Qt 学习目录 |
 | 主线方向 | Linux C、POSIX、TCP、epoll、交叉编译、i.MX6ULL | 持续迭代 |
 
@@ -48,7 +49,7 @@ linux-embedded-learning/
 ├── notes/                                  # 每日学习笔记
 │   ├── day01.md
 │   ├── ...
-│   └── day43.md
+│   └── day45.md
 ├── linux_projects/                         # Linux C 练习和综合项目
 │   ├── day01_hello_linux/
 │   ├── day02_compile_flow/
@@ -63,7 +64,8 @@ linux-embedded-learning/
 │   ├── day41_cross_compile/
 │   ├── day42_gateway_on_board/
 │   ├── day43_led_control/
-│   └── day44_gateway_led_hardware/
+│   ├── day44_gateway_led_hardware/
+│   └── day45_key_input/
 └── qt_projects/                            # Qt / 嵌入式 HMI 并行轨道
     └── qt_day04_first_app/
 ~~~
@@ -187,7 +189,8 @@ Day 41、Day 43 和 Day 44 的 Makefile 使用 ARM 交叉编译器时，生成�
 | 41 | ARM 交叉编译与开发板运行 | [day41_cross_compile](./linux_projects/day41_cross_compile) | [day41.md](./notes/day41.md) |
 | 42 | 设备网关项目上板运行 | [day42_gateway_on_board](./linux_projects/day42_gateway_on_board) | [day42.md](./notes/day42.md) |
 | 43 | sysfs LED 控制与交叉编译工具链适配 | [day43_led_control](./linux_projects/day43_led_control) | [day43.md](./notes/day43.md) |
-| 44 | 设备网关 LED 硬件扩展准备 | [day44_gateway_led_hardware](./linux_projects/day44_gateway_led_hardware) | [day44 README](./linux_projects/day44_gateway_led_hardware/README.md) |
+| 44 | 设备网关 LED 硬件扩展准备 | [day44_gateway_led_hardware](./linux_projects/day44_gateway_led_hardware) | [day44.md](./notes/day44.md) |
+| 45 | 按键输入：读取 input event 并控制 LED | [day45_key_input](./linux_projects/day45_key_input) | [day45.md](./notes/day45.md) |
 
 ## Day 43：通过 sysfs 控制开发板 LED
 
@@ -282,6 +285,126 @@ sysfs / GPIO / 驱动节点
 ~~~
 
 Day 43 的 ledctl 已经验证了 sysfs 控制链路，下一步可以把这部分逻辑封装到网关的设备状态模块中，并继续保留错误处理、日志记录和统一响应。
+
+## Day 45：按键输入，读取 input event 并控制 LED
+
+Day 45 的目标是读取 i.MX6ULL 开发板上的用户按键，并把按键事件转换成程序行为。
+
+最终效果：
+
+```text
+按下用户按键
+  -> 程序从 /dev/input/event1 读到事件
+  -> 判断 KEY_0 pressed
+  -> 切换 led_state
+  -> 写 /sys/class/leds/green/brightness
+  -> green LED 真实亮灭切换
+```
+
+这一天补齐了硬件输入能力：
+
+```text
+Day43/Day44：程序控制 LED 输出
+Day45：程序读取按键输入
+```
+
+### 设备发现
+
+开发板上查看 input 设备：
+
+```bash
+ls -l /dev/input
+cat /proc/bus/input/devices
+cat /sys/class/input/input1/name     # sgpio-keys
+```
+
+`/dev/input/event0` 是电源键（snvs-powerkey），`/dev/input/event1` 是普通 GPIO 用户按键（sgpio-keys）。程序使用 `/dev/input/event1`。
+
+### input_event 结构
+
+程序读取 Linux input 子系统暴露的二进制事件结构：
+
+```c
+struct input_event event;
+read(fd, &event, sizeof(event));
+```
+
+核心字段：
+
+| 字段 | 含义 |
+| --- | --- |
+| `event.type` | 事件类型（EV_KEY = 1） |
+| `event.code` | 按键编号（KEY_0 = 11） |
+| `event.value` | 按键动作（1 = 按下，0 = 松开，2 = 重复） |
+
+一次按下再松开产生 4 个事件：`KEY_0 pressed → EV_SYN → KEY_0 released → EV_SYN`。
+
+### 程序逻辑
+
+```text
+open /dev/input/event1
+  -> 循环 read input_event
+  -> 过滤 EV_KEY + KEY_0
+  -> 按下时切换 led_state
+  -> 写 /sys/class/leds/green/brightness
+```
+
+项目结构：
+
+```text
+day45_key_input/
+├── src/main.c
+├── Makefile
+```
+
+编译使用 Arm GNU Toolchain 8.3，生成 `key_monitor` 可执行文件。
+
+在开发板上运行：
+
+```bash
+cd /home/debian/apps/day45_key_input
+./key_monitor
+```
+
+运行输出示例：
+
+```text
+listening key events from /dev/input/event1
+press Ctrl+C to exit
+KEY_0 pressed, led_state=on
+KEY_0 released
+KEY_0 pressed, led_state=off
+KEY_0 released
+```
+
+### 踩坑要点
+
+- **evtest 不存在**：开发板没有安装 evtest，因此自己写 C 程序读取 `/dev/input/event1`，这更接近真实应用开发。
+- **event 文件不是文本**：`cat /dev/input/event1` 没有可读输出，因为 input event 是二进制结构体，必须用 `read()` 按 `struct input_event` 解析。
+- **查路径不是死记命令**：先看 `/dev/input` 有哪些 event，再看 `/proc/bus/input/devices` 判断对应关系，确认 key code 后再写程序。
+
+### 结论
+
+Day 45 完成了硬件输入链路：
+
+```text
+物理按键
+  -> gpio-keys 驱动
+  -> /dev/input/event1
+  -> struct input_event
+  -> KEY_0 pressed/released
+  -> 程序状态切换
+  -> green LED 真实亮灭
+```
+
+现在项目已经具备两个基础硬件能力：
+
+```text
+输出：控制 LED（Day 43 / Day 44）
+输入：读取按键（Day 45）
+```
+
+下一步可以把按键状态接入设备网关，让 `status` 返回真实按键状态，或让按键事件主动影响网关状态。
 
 ## 开发环境
 
