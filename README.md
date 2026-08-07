@@ -28,14 +28,14 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 43 天。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 44 天。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll 多客户端协议服务器 → 设备网关模块化重构 → 日志模块集成 → 配置文件管理 → 信号驱动的优雅退出 → 设备状态模块与 LED 控制 → 动态采样 → 统一响应格式与错误码 → 项目整理收尾 → i.MX6ULL 开发板环境搭建 → ARM 交叉编译（WSL → 开发板）→ 设备网关项目上板运行 → LED sysfs 控制：C 程序通过 /sys/class/leds 控制开发板硬件 LED。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll 多客户端协议服务器 → 设备网关模块化重构 → 日志模块集成 → 配置文件管理 → 信号驱动的优雅退出 → 设备状态模块与 LED 控制 → 动态采样 → 统一响应格式与错误码 → 项目整理收尾 → i.MX6ULL 开发板环境搭建 → ARM 交叉编译（WSL → 开发板）→ 设备网关项目上板运行 → LED sysfs 控制：C 程序通过 /sys/class/leds 控制开发板硬件 LED → 设备网关硬件 LED 集成：将 TCP 设备网关的 LED 控制命令接入真实 sysfs LED 接口。
 
 ---
 
@@ -123,7 +123,8 @@ linux-embedded-learning/
 │   ├── day31_device_gateway_refactor/    # 设备网关重构：protocol/command/server/client 模块化
 │   ├── day41_cross_compile/              # 交叉编译：ARM 工具链、hello_board 在 i.MX6ULL 运行
 │   ├── day42_gateway_on_board/           # 设备网关上板：Day39 完整项目部署到 i.MX6ULL
-│   └── day43_led_control/                # LED 控制：通过 sysfs 控制 i.MX6ULL 开发板 LED
+│   ├── day43_led_control/                # LED 控制：通过 sysfs 控制 i.MX6ULL 开发板 LED
+│   └── day44_gateway_led_hardware/        # 设备网关硬件 LED：TCP 网关集成真实 sysfs LED 控制
 │
 ├── qt_projects/                         # Qt 嵌入式 HMI 项目（并行轨道）
 └── .gitignore
@@ -133,7 +134,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 已完成 43 天总览
+### 📅 已完成 44 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -178,6 +179,7 @@ linux-embedded-learning/
 | 39 | 项目整理与收尾 | 08-05 | 最终 PC 版项目整理、README 文档、可展示可讲解可迁移 |
 | 40 | 开发板基础环境准备 | 08-05 | i.MX6ULL 串口连接、网络配置、`scp`/`nfs` 文件传输、SDK 部署 |
 | 43 | LED 控制：sysfs 操作硬件 | 08-06 | `open`/`write`/`close` 操作 `/sys/class/leds/*/brightness`、`ledctl` CLI 工具 |
+| 44 | 设备网关硬件 LED 集成 | 08-07 | TCP 设备网关集成 sysfs LED、`led_hw` 模块替换软件模拟 LED |
 | 41 | ARM 交叉编译入门 | 08-05 | `arm-linux-gnueabihf-gcc`、`-static` 静态链接、hello_board 上板运行 |
 | 42 | 设备网关项目上板 | 08-06 | Day39 完整项目交叉编译 + 部署到 i.MX6ULL、开发板运行设备网关 |
 
@@ -293,6 +295,7 @@ linux-embedded-learning/
 
 | 天次 | 项目 | 核心产出 |
 | 43 | `led_control` LED 控制 | C 程序通过 sysfs（`/sys/class/leds/*/brightness`）控制 i.MX6ULL 开发板 LED、`ledctl` 命令行工具 |
+| 44 | `gateway_led_hardware` 网关硬件 LED | 设备网关项目集成真实 sysfs LED 控制、`led_hw` 模块替换软件模拟、网关命令控制开发板 LED |
 |:---:|------|------|
 | 41 | `cross_compile` 交叉编译 | `arm-linux-gnueabihf-gcc` 工具链、`-static` 静态链接避免库依赖、`hello_board` 上板闭环 |
 | 42 | `gateway_on_board` 网关上板 | Day39 完整设备网关项目交叉编译 + `scp` 部署到 i.MX6ULL + 开发板运行 server/client |
@@ -632,5 +635,5 @@ cd linux_projects/day43_led_control
 ---
 
 <p align="center">
-  <sub>从编译选项到 epoll 高性能服务器 → 模块化架构重构 → 日志/配置/信号模块集成 → 设备状态与 LED 控制 → 动态采样 → 统一响应码 → 项目整理 → i.MX6ULL 开发板环境搭建 → ARM 交叉编译 → 设备网关完整项目上板运行，43 天嵌入式 Linux C 系统编程学习计划圆满完成 🎉</sub>
+  <sub>从编译选项到 epoll 高性能服务器 → 模块化架构重构 → 日志/配置/信号模块集成 → 设备状态与 LED 控制 → 动态采样 → 统一响应码 → 项目整理 → i.MX6ULL 开发板环境搭建 → ARM 交叉编译 → 设备网关完整项目上板运行 → LED sysfs 控制 → 设备网关硬件 LED 集成，44 天嵌入式 Linux C 系统编程学习计划圆满完成 🎉</sub>
 </p>
