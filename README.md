@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议），通过模块化重构掌握真实嵌入式项目的工程结构，最后通过交叉编译将设备网关部署到 ARM 开发板并接入真实 LED 硬件控制与按键输入。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议），通过模块化重构掌握真实嵌入式项目的工程结构，最后通过交叉编译将设备网关部署到 ARM 开发板，接入真实 LED 硬件控制与按键输入，并注册为 systemd 系统服务实现开机自启。
 
 ---
 
@@ -29,7 +29,7 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 46 天。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 48 天。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
@@ -91,7 +91,8 @@ linux-embedded-learning/
 │   ├── day43.md                         # sysfs LED 控制：/sys/class/leds/*/brightness
 │   ├── day44.md                         # 设备网关接入真实 LED：led_control 模块集成
 │   ├── day45.md                         # 按键输入：读取 /dev/input/event1 控制 LED
-│   └── day46.md                         # 按键状态接入设备网关：key_input线程 + 共享DeviceState
+│   ├── day46.md                         # 按键状态接入设备网关：key_input线程 + 共享DeviceState
+│   └── day48.md                         # systemd 服务部署：demo-gateway.service 开机自启
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -139,7 +140,8 @@ linux-embedded-learning/
 │   ├── day43_led_control/               # sysfs LED 控制：C 程序控制开发板真实 LED 亮灭
 │   ├── day44_gateway_led_hardware/       # 设备网关 + LED 硬件：led_control 模块集成到网关
 │   ├── day45_key_input/                 # 按键输入：读取 input event 控制 LED
-│   └── day46_gateway_key_status/         # 按键状态接入设备网关：key_input线程 + 共享DeviceState
+│   ├── day46_gateway_key_status/         # 按键状态接入设备网关：key_input线程 + 共享DeviceState
+│   └── day48_gateway_systemd_service/    # systemd 服务部署：开机自启、日志与状态管理
 │
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
 │   ├── notes/                           # 笔记副本（day01~day25）
@@ -155,7 +157,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 已完成 46 天总览
+### 📅 已完成 48 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -205,6 +207,7 @@ linux-embedded-learning/
 | 44 | 设备网关 + LED 硬件 | 08-07 | `led_control` 模块、网关集成真实 LED、`ledctl` 命令行工具、硬件控制闭环 |
 | 45 | 按键输入：读取 input event 控制 LED | 08-07 | `/dev/input/event1`、`struct input_event`、`EV_KEY`/`KEY_0`、按键驱动 LED |
 | 46 | 按键状态接入设备网关 | 08-10 | `pthread` 按键监听线程、共享 `DeviceState`、`key_input` 模块、`status` 返回 key=pressed/released |
+| 48 | 设备网关 systemd 服务部署 | 08-10 | `systemd` unit 文件、`systemctl` 服务管理、开机自启、`deploy/` 部署脚本 |
 
 ---
 
@@ -331,6 +334,7 @@ linux-embedded-learning/
 | 44 | `gateway_led_hardware` | 设备网关 + 真实 LED：新增 `led_control` 模块，将 TCP 网关的 `led on`/`led off` 命令接入真实硬件 LED，完成"网络命令 → 硬件动作"完整闭环 |
 | 45 | `key_input` | 按键输入：读取 `/dev/input/event1` 的 `struct input_event`，识别 `KEY_0` 按下/松开，切换并控制 green LED 亮灭 |
 | 46 | `gateway_key_status` | 按键状态接入设备网关：key_input 线程阻塞读取按键事件，更新共享 DeviceState，status 命令返回 key=pressed/released |
+| 48 | `gateway_systemd_service` | systemd 服务部署：设备网关注册为系统服务，`systemctl start/stop/status/enable` 管理生命周期，`Restart=on-failure` 自动重启 |
 
 ---
 
@@ -688,6 +692,19 @@ make                        # 编译 server + client（含 key_input 模块，-p
 # PC 终端：./client status（查询 key=pressed/released）
 # 按下开发板 KEY_0 → status 返回 key=pressed
 # 松开开发板 KEY_0 → status 返回 key=released
+
+# Day 48 — 设备网关部署为 systemd 服务
+cd linux_projects/day48_gateway_systemd_service
+make                        # 交叉编译 server + client
+# 部署到开发板：
+#   scp build/server build/client debian@192.168.7.2:/home/debian/apps/day48_gateway_systemd_service/
+#   scp deploy/demo-gateway.service → /etc/systemd/system/
+#   systemctl daemon-reload && systemctl start demo-gateway && systemctl enable demo-gateway
+# 开发板操作：
+systemctl status demo-gateway   # 查看服务运行状态
+systemctl stop demo-gateway     # 停止服务
+systemctl restart demo-gateway  # 重启服务
+# 开机自启验证：systemctl is-enabled demo-gateway → enabled
 ```
 
 ---
@@ -726,5 +743,5 @@ make                        # 编译 server + client（含 key_input 模块，-p
 ---
 
 <p align="center">
-  <sub>从编译选项到 epoll 高性能服务器 → 设备网关渐进式迭代 → 开发板上板 → 交叉编译 → 接入真实 LED 硬件与按键输入，46 天学习计划已完成 🎉</sub>
+  <sub>从编译选项到 epoll 高性能服务器 → 设备网关渐进式迭代 → 开发板上板 → 交叉编译 → 接入真实 LED 硬件与按键输入 → systemd 服务部署，48 天学习计划已完成 🎉</sub>
 </p>
