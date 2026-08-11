@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议），通过模块化重构掌握真实嵌入式项目的工程结构，交叉编译部署到 ARM 开发板，接入真实 LED 硬件控制与按键输入，注册为 systemd 系统服务实现开机自启，并通过 logrotate 管理日志轮转防止存储耗尽。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议），通过模块化重构掌握真实嵌入式项目的工程结构，交叉编译部署到 ARM 开发板，接入真实 LED 硬件控制与按键输入，注册为 systemd 系统服务实现开机自启，通过 logrotate 管理日志轮转防止存储耗尽，并通过 diagnostics 模块实现运行诊断接口（diag 命令）。
 
 ---
 
@@ -37,7 +37,7 @@
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll + 应用协议单线程命令服务器 → 项目结构重构：protocol / command / server / client 四模块分离 → 设备网关渐进式迭代（日志模块 → 配置文件 → 优雅退出 → 设备状态 → LED 状态管理 → 动态采样 → 统一响应格式与错误码）→ 项目整理与简历版收尾 → 开发板基础环境准备（串口 / USB 网络 / SSH / scp）→ 交叉编译 ARM 程序部署到 i.MX6ULL → 设备网关上板运行 → sysfs LED 控制 → 设备网关接入真实 LED 硬件 → 按键输入（input event）→ 按键状态接入设备网关（pthread 共享状态）→ systemd 服务部署（开机自启）→ logrotate 日志轮转（存储保护）。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll + 应用协议单线程命令服务器 → 项目结构重构：protocol / command / server / client 四模块分离 → 设备网关渐进式迭代（日志模块 → 配置文件 → 优雅退出 → 设备状态 → LED 状态管理 → 动态采样 → 统一响应格式与错误码）→ 项目整理与简历版收尾 → 开发板基础环境准备（串口 / USB 网络 / SSH / scp）→ 交叉编译 ARM 程序部署到 i.MX6ULL → 设备网关上板运行 → sysfs LED 控制 → 设备网关接入真实 LED 硬件 → 按键输入（input event）→ 按键状态接入设备网关（pthread 共享状态）→ systemd 服务部署（开机自启）→ logrotate 日志轮转（存储保护）→ diagnostics 运行诊断接口（diag 命令：version/pid/uptime_sec）。
 
 ---
 
@@ -95,6 +95,7 @@ linux-embedded-learning/
 │   ├── day46.md                         # 按键状态接入设备网关：key_input线程 + 共享DeviceState
 │   ├── day48.md                         # systemd 服务部署：demo-gateway.service 开机自启
 │   ├── day53.md                         # 网关日志轮转：logrotate 规则与存储保护
+│   ├── day54.md                         # 运行诊断接口：diag 命令、version/pid/uptime_sec
 │   └── purchase_reminders.md            # 硬件采购提醒：提前规划采购清单
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
@@ -145,7 +146,8 @@ linux-embedded-learning/
 │   ├── day45_key_input/                 # 按键输入：读取 input event 控制 LED
 │   ├── day46_gateway_key_status/         # 按键状态接入设备网关：key_input线程 + 共享DeviceState
 │   ├── day48_gateway_systemd_service/    # systemd 服务部署：开机自启、日志与状态管理
-│   └── day53_gateway_logrotate/          # logrotate 日志轮转：规则文件、copytruncate、compress
+│   ├── day53_gateway_logrotate/          # logrotate 日志轮转：规则文件、copytruncate、compress
+│   └── day54_gateway_diagnostics/        # 运行诊断接口：diag 命令、version/pid/uptime_sec
 │
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
 │   ├── notes/                           # 笔记副本（day01~day25）
@@ -213,6 +215,7 @@ linux-embedded-learning/
 | 46 | 按键状态接入设备网关 | 08-10 | `pthread` 按键监听线程、共享 `DeviceState`、`key_input` 模块、`status` 返回 key=pressed/released |
 | 48 | 设备网关 systemd 服务部署 | 08-10 | `systemd` unit 文件、`systemctl` 服务管理、开机自启、`deploy/` 部署脚本 |
 | 53 | 网关日志轮转与存储保护 | 08-11 | `logrotate`、规则文件（size/rotate/copytruncate/compress/delaycompress）、`logrotate -d`/`-f`、`/var/lib/logrotate/status` |
+| 54 | 网关运行诊断接口（diag） | 08-11 | `diagnostics` 模块、`diag` 命令、version/pid/uptime_sec、`getpid`、`snprintf`、`static` 内部状态、`systemctl stop` 更新流程 |
 
 ---
 
@@ -350,6 +353,7 @@ linux-embedded-learning/
 | 天次 | 项目 | 核心产出 |
 |:---:|------|------|
 | 53 | `gateway_logrotate` | logrotate 日志轮转：规则文件编写（size/rotate/copytruncate/compress/delaycompress）、`logrotate -d` 模拟测试、`logrotate -f` 强制轮转验证、`/var/lib/logrotate/status` 状态确认 |
+| 54 | `gateway_diagnostics` | 运行诊断接口：`diagnostics` 模块、`diag` 命令、version/pid/uptime_sec、`snprintf` 安全格式化、`getpid` 进程 PID、`static` 模块内部状态 |
 
 ---
 
@@ -738,6 +742,22 @@ logrotate -f /etc/logrotate.d/demo-gateway    # force 强制执行一次轮转
 ls -lh /home/debian/apps/day48_gateway_systemd_service/logs
 # 查看 logrotate 状态：
 grep server.log -n /var/lib/logrotate/status
+```
+
+```bash
+# Day 54 — 网关运行诊断接口（diag 命令）
+cd linux_projects/day54_gateway_diagnostics
+make                        # 编译 server + client（含 diagnostics 模块）
+# 部署到开发板：
+#   systemctl stop demo-gateway
+#   scp build/server build/client debian@192.168.7.2:/home/debian/apps/day54_gateway_diagnostics/
+#   scp deploy/demo-gateway.service → /etc/systemd/system/
+#   systemctl daemon-reload && systemctl start demo-gateway
+# 测试 diag 命令：
+./build/client diag          # 返回 version/pid/uptime_sec
+./build/client status
+# 验证 PID 一致：
+systemctl status demo-gateway   # Main PID 与 client diag 返回的 pid 一致
 ```
 
 ---

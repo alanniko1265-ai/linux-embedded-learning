@@ -1,0 +1,14 @@
+[Unit]
+Description=Demo Gateway Service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/debian/apps/day54_gateway_diagnostics
+ExecStart=/home/debian/apps/day54_gateway_diagnostics/server
+Restart=on-failure
+RestartSec=2
+User=root
+
+[Install]
+WantedBy=multi-user.target
