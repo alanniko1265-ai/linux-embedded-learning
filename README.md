@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议），通过模块化重构掌握真实嵌入式项目的工程结构，最后通过交叉编译将设备网关部署到 ARM 开发板，接入真实 LED 硬件控制与按键输入，并注册为 systemd 系统服务实现开机自启。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议），通过模块化重构掌握真实嵌入式项目的工程结构，交叉编译部署到 ARM 开发板，接入真实 LED 硬件控制与按键输入，注册为 systemd 系统服务实现开机自启，并通过 logrotate 管理日志轮转防止存储耗尽。
 
 ---
 
@@ -20,6 +20,7 @@
 - [Week 9：设备网关渐进式迭代](#week-9设备网关渐进式迭代)
 - [Week 10：项目整理 & 开发板上板](#week-10项目整理--开发板上板)
 - [Week 11：交叉编译 & 开发板上板实战](#week-11交叉编译--开发板上板实战)
+- [Week 12：运维与日志管理](#week-12运维与日志管理)
 - [环境要求](#环境要求)
 - [快速开始](#快速开始)
 - [并行学习轨道](#并行学习轨道)
@@ -29,14 +30,14 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 48 天。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，持续更新中。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll + 应用协议单线程命令服务器 → 项目结构重构：protocol / command / server / client 四模块分离 → 设备网关渐进式迭代（日志模块 → 配置文件 → 优雅退出 → 设备状态 → LED 状态管理 → 动态采样 → 统一响应格式与错误码）→ 项目整理与简历版收尾 → 开发板基础环境准备（串口 / USB 网络 / SSH / scp）→ 交叉编译 ARM 程序部署到 i.MX6ULL → 设备网关上板运行 → sysfs LED 控制 → 设备网关接入真实 LED 硬件。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll + 应用协议单线程命令服务器 → 项目结构重构：protocol / command / server / client 四模块分离 → 设备网关渐进式迭代（日志模块 → 配置文件 → 优雅退出 → 设备状态 → LED 状态管理 → 动态采样 → 统一响应格式与错误码）→ 项目整理与简历版收尾 → 开发板基础环境准备（串口 / USB 网络 / SSH / scp）→ 交叉编译 ARM 程序部署到 i.MX6ULL → 设备网关上板运行 → sysfs LED 控制 → 设备网关接入真实 LED 硬件 → 按键输入（input event）→ 按键状态接入设备网关（pthread 共享状态）→ systemd 服务部署（开机自启）→ logrotate 日志轮转（存储保护）。
 
 ---
 
@@ -92,7 +93,9 @@ linux-embedded-learning/
 │   ├── day44.md                         # 设备网关接入真实 LED：led_control 模块集成
 │   ├── day45.md                         # 按键输入：读取 /dev/input/event1 控制 LED
 │   ├── day46.md                         # 按键状态接入设备网关：key_input线程 + 共享DeviceState
-│   └── day48.md                         # systemd 服务部署：demo-gateway.service 开机自启
+│   ├── day48.md                         # systemd 服务部署：demo-gateway.service 开机自启
+│   ├── day53.md                         # 网关日志轮转：logrotate 规则与存储保护
+│   └── purchase_reminders.md            # 硬件采购提醒：提前规划采购清单
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -141,7 +144,8 @@ linux-embedded-learning/
 │   ├── day44_gateway_led_hardware/       # 设备网关 + LED 硬件：led_control 模块集成到网关
 │   ├── day45_key_input/                 # 按键输入：读取 input event 控制 LED
 │   ├── day46_gateway_key_status/         # 按键状态接入设备网关：key_input线程 + 共享DeviceState
-│   └── day48_gateway_systemd_service/    # systemd 服务部署：开机自启、日志与状态管理
+│   ├── day48_gateway_systemd_service/    # systemd 服务部署：开机自启、日志与状态管理
+│   └── day53_gateway_logrotate/          # logrotate 日志轮转：规则文件、copytruncate、compress
 │
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
 │   ├── notes/                           # 笔记副本（day01~day25）
@@ -157,7 +161,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 已完成 48 天总览
+### 📅 学习总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -208,6 +212,7 @@ linux-embedded-learning/
 | 45 | 按键输入：读取 input event 控制 LED | 08-07 | `/dev/input/event1`、`struct input_event`、`EV_KEY`/`KEY_0`、按键驱动 LED |
 | 46 | 按键状态接入设备网关 | 08-10 | `pthread` 按键监听线程、共享 `DeviceState`、`key_input` 模块、`status` 返回 key=pressed/released |
 | 48 | 设备网关 systemd 服务部署 | 08-10 | `systemd` unit 文件、`systemctl` 服务管理、开机自启、`deploy/` 部署脚本 |
+| 53 | 网关日志轮转与存储保护 | 08-11 | `logrotate`、规则文件（size/rotate/copytruncate/compress/delaycompress）、`logrotate -d`/`-f`、`/var/lib/logrotate/status` |
 
 ---
 
@@ -335,6 +340,16 @@ linux-embedded-learning/
 | 45 | `key_input` | 按键输入：读取 `/dev/input/event1` 的 `struct input_event`，识别 `KEY_0` 按下/松开，切换并控制 green LED 亮灭 |
 | 46 | `gateway_key_status` | 按键状态接入设备网关：key_input 线程阻塞读取按键事件，更新共享 DeviceState，status 命令返回 key=pressed/released |
 | 48 | `gateway_systemd_service` | systemd 服务部署：设备网关注册为系统服务，`systemctl start/stop/status/enable` 管理生命周期，`Restart=on-failure` 自动重启 |
+
+---
+
+## Week 12：运维与日志管理
+
+**目标**：在服务已由 systemd 托管的基础上，引入 Linux 标准日志轮转工具 logrotate，解决嵌入式设备长期运行时日志文件无限增长导致存储耗尽的问题。
+
+| 天次 | 项目 | 核心产出 |
+|:---:|------|------|
+| 53 | `gateway_logrotate` | logrotate 日志轮转：规则文件编写（size/rotate/copytruncate/compress/delaycompress）、`logrotate -d` 模拟测试、`logrotate -f` 强制轮转验证、`/var/lib/logrotate/status` 状态确认 |
 
 ---
 
@@ -707,6 +722,24 @@ systemctl restart demo-gateway  # 重启服务
 # 开机自启验证：systemctl is-enabled demo-gateway → enabled
 ```
 
+```bash
+# Day 53 — 网关日志轮转（logrotate）
+cd linux_projects/day53_gateway_logrotate
+# 部署到开发板：
+#   scp deploy/demo-gateway-logrotate debian@192.168.7.2:/home/debian/
+# 开发板 root 终端：
+#   cp /home/debian/demo-gateway-logrotate /etc/logrotate.d/demo-gateway
+#   chmod 644 /etc/logrotate.d/demo-gateway
+# 模拟测试：
+logrotate -d /etc/logrotate.d/demo-gateway    # debug 模式，不真正修改
+# 强制轮转测试：
+logrotate -f /etc/logrotate.d/demo-gateway    # force 强制执行一次轮转
+# 查看轮转结果：
+ls -lh /home/debian/apps/day48_gateway_systemd_service/logs
+# 查看 logrotate 状态：
+grep server.log -n /var/lib/logrotate/status
+```
+
 ---
 
 ## 并行学习轨道
@@ -743,5 +776,5 @@ systemctl restart demo-gateway  # 重启服务
 ---
 
 <p align="center">
-  <sub>从编译选项到 epoll 高性能服务器 → 设备网关渐进式迭代 → 开发板上板 → 交叉编译 → 接入真实 LED 硬件与按键输入 → systemd 服务部署，48 天学习计划已完成 🎉</sub>
+  <sub>从编译选项到 epoll 高性能服务器 → 设备网关渐进式迭代 → 开发板上板 → 交叉编译 → 接入真实 LED 硬件与按键输入 → systemd 服务部署 → logrotate 日志轮转，学习计划持续进行中 🚀</sub>
 </p>

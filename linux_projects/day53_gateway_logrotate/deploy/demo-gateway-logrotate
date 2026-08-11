@@ -1,0 +1,9 @@
+/home/debian/apps/day48_gateway_systemd_service/logs/server.log {
+    size 64k
+    rotate 4
+    missingok
+    notifempty
+    copytruncate
+    compress
+    delaycompress
+}
