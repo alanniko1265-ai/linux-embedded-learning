@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议），通过模块化重构掌握真实嵌入式项目的工程结构，最后通过交叉编译将设备网关部署到 ARM 开发板并接入真实 LED 硬件控制。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议），通过模块化重构掌握真实嵌入式项目的工程结构，交叉编译将设备网关部署到 ARM 开发板并接入真实 LED 硬件控制，最终完成 systemd 服务化部署、日志轮转与运行诊断等生产级运维能力。
 
 ---
 
@@ -20,6 +20,8 @@
 - [Week 9：设备网关渐进式迭代](#week-9设备网关渐进式迭代)
 - [Week 10：项目整理 & 开发板上板](#week-10项目整理--开发板上板)
 - [Week 11：交叉编译 & 开发板上板实战](#week-11交叉编译--开发板上板实战)
+- [Week 12：按键接入 & 硬件接口 bring-up](#week-12按键接入--硬件接口-bring-up)
+- [Week 13：生产级运维能力](#week-13生产级运维能力)
 - [环境要求](#环境要求)
 - [快速开始](#快速开始)
 - [并行学习轨道](#并行学习轨道)
@@ -29,14 +31,14 @@
 
 ## 项目概览
 
-本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 45 天。每天包含：
+本仓库记录了从 **2026-07-08** 开始的 Linux 嵌入式 C 编程自学过程，当前已完成 54 天。每天包含：
 
 - 📝 **学习笔记**（`notes/`）：目标清单、命令记录、概念讲解、踩坑记录、每日总结
 - 💻 **项目代码**（`linux_projects/`）：完整的 C 项目，含源码、Makefile / CMake 构建脚本、测试数据
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll + 应用协议单线程命令服务器 → 项目结构重构：protocol / command / server / client 四模块分离 → 设备网关渐进式迭代（日志模块 → 配置文件 → 优雅退出 → 设备状态 → LED 状态管理 → 动态采样 → 统一响应格式与错误码）→ 项目整理与简历版收尾 → 开发板基础环境准备（串口 / USB 网络 / SSH / scp）→ 交叉编译 ARM 程序部署到 i.MX6ULL → 设备网关上板运行 → sysfs LED 控制 → 设备网关接入真实 LED 硬件。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll + 应用协议单线程命令服务器 → 项目结构重构：protocol / command / server / client 四模块分离 → 设备网关渐进式迭代（日志模块 → 配置文件 → 优雅退出 → 设备状态 → LED 状态管理 → 动态采样 → 统一响应格式与错误码）→ 项目整理与简历版收尾 → 开发板基础环境准备（串口 / USB 网络 / SSH / scp）→ 交叉编译 ARM 程序部署到 i.MX6ULL → 设备网关上板运行 → sysfs LED 控制 → 设备网关接入真实 LED 硬件 → 按键输入接入网关 → RS485 接口 bring-up → systemd 服务化部署 → 日志轮转 logrotate → 网关运行诊断接口。
 
 ---
 
@@ -90,7 +92,11 @@ linux-embedded-learning/
 │   ├── day42.md                         # 设备网关上板运行：交叉编译 + 开发板部署
 │   ├── day43.md                         # sysfs LED 控制：/sys/class/leds/*/brightness
 │   ├── day44.md                         # 设备网关接入真实 LED：led_control 模块集成
-│   └── day45.md                         # 按键输入：读取 /dev/input/event1 控制 LED
+│   ├── day46.md                         # 按键状态接入设备网关：key_input 线程 + 状态同步
+│   ├── day47.md                         # RS485 接口验证与板级排障
+│   ├── day48.md                         # systemd 服务：将设备网关部署为系统服务
+│   ├── day53.md                         # logrotate 日志轮转与存储保护
+│   └── day54.md                         # 网关运行诊断接口：diag 命令
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
 │   ├── day01_hello_linux/               # Hello World — 环境验证
@@ -137,7 +143,10 @@ linux-embedded-learning/
 │   ├── day42_gateway_on_board/           # 设备网关交叉编译上板：WSL→ARM→开发板运行
 │   ├── day43_led_control/               # sysfs LED 控制：C 程序控制开发板真实 LED 亮灭
 │   ├── day44_gateway_led_hardware/       # 设备网关 + LED 硬件：led_control 模块集成到网关
-│   └── day45_key_input/                 # 按键输入：读取 input event 控制 LED
+│   ├── day46_gateway_key_status/         # 按键状态接入设备网关：key_input 线程 + DeviceState
+│   ├── day48_gateway_systemd_service/    # 设备网关 systemd 服务化部署
+│   ├── day53_gateway_logrotate/          # 网关日志轮转：logrotate 配置
+│   └── day54_gateway_diagnostics/        # 网关诊断：diag 命令（版本/pid/uptime）
 │
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
 │   ├── notes/                           # 笔记副本（day01~day25）
@@ -153,7 +162,7 @@ linux-embedded-learning/
 
 ## 学习路线
 
-### 📅 已完成 45 天总览
+### 📅 已完成 54 天总览
 
 | 天次 | 主题 | 日期 | 关键 API / 工具 |
 |:---:|------|:---:|------|
@@ -202,6 +211,11 @@ linux-embedded-learning/
 | 43 | sysfs LED 控制 | 08-07 | `/sys/class/leds/*/brightness`、`open`/`write`/`close`、真实 LED 亮灭 |
 | 44 | 设备网关 + LED 硬件 | 08-07 | `led_control` 模块、网关集成真实 LED、`ledctl` 命令行工具、硬件控制闭环 |
 | 45 | 按键输入：读取 input event 控制 LED | 08-07 | `/dev/input/event1`、`struct input_event`、`EV_KEY`/`KEY_0`、按键驱动 LED |
+| 46 | 按键状态接入设备网关 | 08-10 | `key_input` 线程、`pthread_create` 监听按键、`DeviceState.key_pressed`、状态同步 |
+| 47 | RS485 接口验证与板级排障 | 08-12 | `/dev/ttymxc1`、RS485-1、USB-RS485 模块、双向通信验证、板级排障流程 |
+| 48 | systemd 服务化部署 | 08-10 | `systemd`、`demo-gateway.service`、`systemctl start/stop/restart`、开机自启 |
+| 53 | 网关日志轮转与存储保护 | 08-11 | `logrotate`、`/etc/logrotate.d/`、日志大小限制、轮转策略、eMMC 保护 |
+| 54 | 网关运行诊断接口 | 08-11 | `diag` 命令、版本号、PID、uptime、运行状态快照 |
 
 ---
 
@@ -327,6 +341,25 @@ linux-embedded-learning/
 | 43 | `led_control` | sysfs LED 控制：通过 `/sys/class/leds/<name>/brightness` 接口，C 程序 `open`/`write`/`close` 控制开发板真实 LED 亮灭 |
 | 44 | `gateway_led_hardware` | 设备网关 + 真实 LED：新增 `led_control` 模块，将 TCP 网关的 `led on`/`led off` 命令接入真实硬件 LED，完成"网络命令 → 硬件动作"完整闭环 |
 | 45 | `key_input` | 按键输入：读取 `/dev/input/event1` 的 `struct input_event`，识别 `KEY_0` 按下/松开，切换并控制 green LED 亮灭 |
+
+## Week 12：按键接入 & 硬件接口 bring-up
+
+**目标**：将 Day 45 的按键输入能力接入设备网关，使按键状态可被 status 命令查询；完成 RS485 接口的硬件 bring-up 与双向通信验证，建立板级硬件排障方法论。
+
+| 天次 | 项目 | 核心产出 |
+|:---:|------|------|
+| 46 | `gateway_key_status` | key_input 线程：`pthread_create` 独立线程监听 `/dev/input/event1`，按键事件更新 `DeviceState.key_pressed`，`status` 命令查询按键状态 |
+| 47 | RS485 bring-up | RS485-1 接口验证：设备树确认、跳帽与收发器供电检查、USB-RS485 模块连接、`/dev/ttymxc1` 双向通信测试、板级排障流程文档化 |
+
+## Week 13：生产级运维能力
+
+**目标**：将设备网关从"手动运行程序"升级为"生产级系统服务"，掌握 systemd 服务管理、logrotate 日志轮转、以及运行时诊断接口等嵌入式 Linux 运维核心技能。
+
+| 天次 | 项目 | 核心产出 |
+|:---:|------|------|
+| 48 | `gateway_systemd_service` | systemd 服务化：`demo-gateway.service` unit 文件、`systemctl start/stop/restart/enable`、开机自启、日志输出到 journald |
+| 53 | `gateway_logrotate` | logrotate 日志轮转：`/etc/logrotate.d/demo-gateway-logrotate` 配置、按大小/时间轮转、压缩归档、防止 eMMC 写满 |
+| 54 | `gateway_diagnostics` | 运行诊断接口：`diag` 命令、版本号 version、进程 PID、uptime_sec 运行时长、`diagnostics` 模块实现运行状态快照 |
 
 ---
 
@@ -676,6 +709,46 @@ make deploy                 # scp 上传到开发板
 ./key_monitor               # 监听 /dev/input/event1，按下 KEY_0 切换 green LED
 # 按下 KEY_0 → green LED 亮
 # 再按 KEY_0 → green LED 灭
+
+# === Week 12 ===
+# Day 46 — 按键状态接入设备网关（key_input 线程 + 状态同步）
+cd linux_projects/day46_gateway_key_status
+make                        # 交叉编译 server + client（含 key_input 模块）
+# 开发板终端：./server（key_input 线程监听按键）
+# PC 终端：./client status  # 查看 key=pressed 或 key=released
+
+# Day 47 — RS485 接口验证与板级排障（文档）
+cd notes
+cat day47.md                # RS485-1 硬件 bring-up 详细记录
+# 关键步骤：设备树确认 → 跳帽检查 → USB-RS485 连接 → /dev/ttymxc1 双向通信
+
+# === Week 13 ===
+# Day 48 — systemd 服务化部署
+cd linux_projects/day48_gateway_systemd_service
+make                        # 交叉编译
+make deploy                 # scp 上传到开发板
+# 开发板终端：
+sudo cp deploy/demo-gateway.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl start demo-gateway
+sudo systemctl status demo-gateway
+sudo systemctl enable demo-gateway   # 开机自启
+
+# Day 53 — 网关日志轮转
+cd linux_projects/day53_gateway_logrotate
+cat deploy/demo-gateway-logrotate   # logrotate 配置规则
+# 开发板终端：
+sudo cp deploy/demo-gateway-logrotate /etc/logrotate.d/
+sudo logrotate -d /etc/logrotate.d/demo-gateway-logrotate  # 模拟测试
+sudo logrotate -f /etc/logrotate.d/demo-gateway-logrotate  # 强制轮转
+
+# Day 54 — 网关运行诊断接口
+cd linux_projects/day54_gateway_diagnostics
+make                        # 编译 server + client（含 diagnostics 模块）
+# 开发板终端：./server
+# PC 终端：
+./build/client diag         # OK code=0 msg=diag version=1.1.0 pid=800 uptime_sec=10
+./build/client status       # 常规状态查询
 ```
 
 ---
@@ -714,5 +787,5 @@ make deploy                 # scp 上传到开发板
 ---
 
 <p align="center">
-  <sub>从编译选项到 epoll 高性能服务器 → 设备网关渐进式迭代 → 开发板上板 → 交叉编译 → 接入真实 LED 硬件，45 天学习计划已完成 🎉</sub>
+  <sub>从编译选项到 epoll 高性能服务器 → 设备网关渐进式迭代 → 开发板上板 → 交叉编译 → 接入真实 LED 硬件 → 按键输入 → RS485 bring-up → systemd 服务化 → 日志轮转 → 运行诊断，54 天学习计划已完成 🎉</sub>
 </p>
