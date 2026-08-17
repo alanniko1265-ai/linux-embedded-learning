@@ -52,6 +52,7 @@ linux_projects/day08_file_io/data/*.txt
 # 临时目录
 repo_tmp/
 wechat_chat_converter/
+tmp_repo/
 
 # linux-learning-notes 镜像 — 同样忽略编译产物
 linux-learning-notes/projects/*/build/

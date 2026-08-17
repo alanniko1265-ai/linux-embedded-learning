@@ -1,6 +1,6 @@
 # Linux 嵌入式学习笔记与项目代码
 
-> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议），通过模块化重构掌握真实嵌入式项目的工程结构，交叉编译部署到 ARM 开发板，接入真实 LED 硬件控制与按键输入、RS485 串口 C 应用（termios 半双工收发），注册为 systemd 系统服务实现开机自启，通过 logrotate 管理日志轮转防止存储耗尽，并通过 diagnostics 模块实现运行诊断接口（diag 命令）。
+> 从零开始的 Linux 嵌入式系统编程学习记录 —— 覆盖编译工具链、构建系统、调试技术、文件 IO、进程管理、信号处理、非阻塞 IO、虚拟文件系统、ioctl 与 mmap、文件监控、多线程编程、生产者消费者模型、IPC 进程间通信（pipe / FIFO）、本地命令服务器综合项目与 TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用、应用层协议设计、请求-响应协议），通过模块化重构掌握真实嵌入式项目的工程结构，交叉编译部署到 ARM 开发板，接入真实 LED 硬件控制与按键输入、RS485 串口 C 应用（termios 半双工收发），注册为 systemd 系统服务实现开机自启，通过 logrotate 管理日志轮转防止存储耗尽，并通过 diagnostics 模块实现运行诊断接口（diag 命令），现已进入内核驱动 / BSP 开发阶段（VehicleSensorLab 虚拟车载传感器驱动实验台）。
 
 ---
 
@@ -21,6 +21,7 @@
 - [Week 10：项目整理 & 开发板上板](#week-10项目整理--开发板上板)
 - [Week 11：交叉编译 & 开发板上板实战](#week-11交叉编译--开发板上板实战)
 - [Week 12：运维与日志管理](#week-12运维与日志管理)
+- [Week 13：驱动 / BSP 开发（VehicleSensorLab）](#week-13驱动--bsp-开发vehiclesensorlab)
 - [环境要求](#环境要求)
 - [快速开始](#快速开始)
 - [并行学习轨道](#并行学习轨道)
@@ -37,7 +38,7 @@
 
 **学习方式**：每个概念先理解原理，再动手写代码验证，最后记录踩坑经历和解决思路。所有项目均可独立编译运行。
 
-**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll + 应用协议单线程命令服务器 → 项目结构重构：protocol / command / server / client 四模块分离 → 设备网关渐进式迭代（日志模块 → 配置文件 → 优雅退出 → 设备状态 → LED 状态管理 → 动态采样 → 统一响应格式与错误码）→ 项目整理与简历版收尾 → 开发板基础环境准备（串口 / USB 网络 / SSH / scp）→ 交叉编译 ARM 程序部署到 i.MX6ULL → 设备网关上板运行 → sysfs LED 控制 → 设备网关接入真实 LED 硬件 → 按键输入（input event）→ 按键状态接入设备网关（pthread 共享状态）→ RS485 C 应用（termios 串口配置 + GPIO22 方向切换 + poll 超时接收）→ systemd 服务部署（开机自启）→ logrotate 日志轮转（存储保护）→ diagnostics 运行诊断接口（diag 命令：version/pid/uptime_sec）。
+**技术路线**：从 `gcc` 命令行开始 → Makefile / CMake 自动化构建 → GDB 调试 → 静态/动态库制作 → POSIX 系统调用 → 进程与信号 → 非阻塞 IO → 模块化日志系统 → 虚拟文件系统与设备接口 → 文件监控综合项目 → 多线程与生产者消费者模型 → IPC 进程间通信（pipe / FIFO）→ 本地命令服务器综合项目 → TCP 网络编程（socket / echo server / 多客户端 / select / poll / epoll IO 多路复用）→ TCP 应用层协议设计与请求-响应模型 → epoll + 应用协议单线程命令服务器 → 项目结构重构：protocol / command / server / client 四模块分离 → 设备网关渐进式迭代（日志模块 → 配置文件 → 优雅退出 → 设备状态 → LED 状态管理 → 动态采样 → 统一响应格式与错误码）→ 项目整理与简历版收尾 → 开发板基础环境准备（串口 / USB 网络 / SSH / scp）→ 交叉编译 ARM 程序部署到 i.MX6ULL → 设备网关上板运行 → sysfs LED 控制 → 设备网关接入真实 LED 硬件 → 按键输入（input event）→ 按键状态接入设备网关（pthread 共享状态）→ RS485 C 应用（termios 串口配置 + GPIO22 方向切换 + poll 超时接收）→ systemd 服务部署（开机自启）→ logrotate 日志轮转（存储保护）→ diagnostics 运行诊断接口（diag 命令：version/pid/uptime_sec）→ 内核驱动 / BSP 开发（VehicleSensorLab 字符设备驱动实验台）。
 
 ---
 
@@ -98,6 +99,7 @@ linux-embedded-learning/
 │   ├── day49.md                         # RS485 C 应用：termios 串口 + GPIO 方向切换 + poll 收发
 │   ├── day53.md                         # 网关日志轮转：logrotate 规则与存储保护
 │   ├── day54.md                         # 运行诊断接口：diag 命令、version/pid/uptime_sec
+│   ├── day55.md                         # VehicleSensorLab 启动：内核构建环境与 DTC 兼容补丁
 │   └── purchase_reminders.md            # 硬件采购提醒：提前规划采购清单
 │
 ├── linux_projects/                      # 💻 Linux C 练习项目
@@ -150,15 +152,15 @@ linux-embedded-learning/
 │   ├── day48_gateway_systemd_service/    # systemd 服务部署：开机自启、日志与状态管理
 │   ├── day49_rs485_app/                 # RS485 C 应用：termios + GPIO22 方向切换 + poll 收发
 │   ├── day53_gateway_logrotate/          # logrotate 日志轮转：规则文件、copytruncate、compress
-│   └── day54_gateway_diagnostics/        # 运行诊断接口：diag 命令、version/pid/uptime_sec
+│   ├── day54_gateway_diagnostics/        # 运行诊断接口：diag 命令、version/pid/uptime_sec
+│   └── vehicle_sensor_lab/               # 虚拟车载传感器驱动与交互实验台（Day55 起主线）
 │
 ├── linux-learning-notes/                # 学习笔记与项目（镜像结构）
 │   ├── notes/                           # 笔记副本（day01~day25）
 │   └── projects/                        # 项目副本（day01~day25）
 │
 ├── qt_projects/                         # Qt 嵌入式 HMI 项目（并行轨道）
-├── Linux_Embedded_App_Summer_Plan.md    # 暑期学习总体计划
-├── Qt_Linux_HMI_Plan_From_Day4.md       # Qt / Linux HMI 专项路线图
+├── Project_Driven_Roadmap_From_Day55.md # 项目驱动路线（Day55—2027 年 4 月）
 └── .gitignore
 ```
 
@@ -221,6 +223,7 @@ linux-embedded-learning/
 | 49 | RS485 C 应用（半双工收发封装） | 08-14 | `termios`, `cfmakeraw`, `cfsetispeed`/`cfsetospeed`, `tcdrain`, `poll`, GPIO22 收发方向切换 |
 | 53 | 网关日志轮转与存储保护 | 08-11 | `logrotate`、规则文件（size/rotate/copytruncate/compress/delaycompress）、`logrotate -d`/`-f`、`/var/lib/logrotate/status` |
 | 54 | 网关运行诊断接口（diag） | 08-11 | `diagnostics` 模块、`diag` 命令、version/pid/uptime_sec、`getpid`、`snprintf`、`static` 内部状态、`systemctl stop` 更新流程 |
+| 55 | VehicleSensorLab 启动：内核构建环境 | 08-17 | 内核模块、Kbuild、`ARCH`/`CROSS_COMPILE`/`O`/`LOCALVERSION`、`Module.symvers`、DTC 兼容补丁 |
 
 ---
 
@@ -361,6 +364,18 @@ linux-embedded-learning/
 |:---:|------|------|
 | 53 | `gateway_logrotate` | logrotate 日志轮转：规则文件编写（size/rotate/copytruncate/compress/delaycompress）、`logrotate -d` 模拟测试、`logrotate -f` 强制轮转验证、`/var/lib/logrotate/status` 状态确认 |
 | 54 | `gateway_diagnostics` | 运行诊断接口：`diagnostics` 模块、`diag` 命令、version/pid/uptime_sec、`snprintf` 安全格式化、`getpid` 进程 PID、`static` 模块内部状态 |
+
+---
+
+## Week 13：驱动 / BSP 开发（VehicleSensorLab）
+
+**目标**：从 Linux 应用开发正式进入驱动 / BSP 开发，以虚拟车载传感器实验台 `vehicle_sensor_lab` 为主线，完成「字符设备 → read/poll/ioctl → 内核环形缓冲 → platform driver / 设备树 → 板载按键与 LED → C++ 服务与 Qt/CLI」的完整跨越。
+
+| 天次 | 项目 | 核心产出 |
+|:---:|------|------|
+| 55 | `vehicle_sensor_lab` | 内核构建环境搭建：确认板载内核 `4.19.35-imx6`、复制运行内核 `.config`、`olddefconfig`、`LOCALVERSION=-imx6` 对齐、DTC `yylloc` 重复定义兼容补丁、最小模块骨架（`vehicle_sensor_module.c` + Kbuild Makefile） |
+
+详见 [VehicleSensorLab README](./linux_projects/vehicle_sensor_lab/README.md)。
 
 ---
 
@@ -787,6 +802,13 @@ make                        # 编译 server + client（含 diagnostics 模块）
 systemctl status demo-gateway   # Main PID 与 client diag 返回的 pid 一致
 ```
 
+```bash
+# Day 55 — VehicleSensorLab 启动：内核构建环境（驱动/BSP 主线开始）
+cat notes/day55.md                                            # 内核构建环境搭建 + DTC 兼容补丁记录
+cat linux_projects/vehicle_sensor_lab/README.md               # 项目定位与分阶段路线
+cat linux_projects/vehicle_sensor_lab/docs/day55_start.md     # 第一阶段任务与验收
+```
+
 ---
 
 ## 并行学习轨道
@@ -797,7 +819,7 @@ systemctl status demo-gateway   # Main PID 与 client diag 返回的 pid 一致
 
 从 Day 4 开始并行的 Qt/C++ 学习线，面向嵌入式 Linux HMI 应用开发。涵盖 Qt Widgets、信号与槽、串口通信、TCP 客户端、多线程 Worker 等。
 
-详见 [Qt_Linux_HMI_Plan_From_Day4.md](./Qt_Linux_HMI_Plan_From_Day4.md)
+早期 Qt / Linux HMI 计划已归档；当前阶段以 Linux 嵌入式实习路线为主。
 
 ### 学习笔记镜像（`linux-learning-notes/`）
 
@@ -817,11 +839,12 @@ systemctl status demo-gateway   # Main PID 与 client diag 返回的 pid 一致
 
 ## 相关文档
 
-- **[Linux_Embedded_App_Summer_Plan.md](./Linux_Embedded_App_Summer_Plan.md)** — 暑期学习总体计划
-- **[Qt_Linux_HMI_Plan_From_Day4.md](./Qt_Linux_HMI_Plan_From_Day4.md)** — Qt / Linux HMI 专项路线图
+- **[Project_Driven_Roadmap_From_Day55.md](./Project_Driven_Roadmap_From_Day55.md)** — 从 Day55 接续、衔接 STM32 + RK3568 联合项目的项目驱动路线
+- **[Job_Screenshot_Analysis_2026-08-17.md](./Job_Screenshot_Analysis_2026-08-17.md)** — 37 张招聘截图归类、岗位进入难度和个人项目校准
+- **[VehicleSensorLab](./linux_projects/vehicle_sensor_lab/README.md)** — 当前主项目：i.MX6ULL 虚拟车载传感器驱动与交互实验台
 
 ---
 
 <p align="center">
-  <sub>从编译选项到 epoll 高性能服务器 → 设备网关渐进式迭代 → 开发板上板 → 交叉编译 → 接入真实 LED 硬件与按键输入 → RS485 串口 C 应用 → systemd 服务部署 → logrotate 日志轮转，学习计划持续进行中 🚀</sub>
+  <sub>从编译选项到 epoll 高性能服务器 → 设备网关渐进式迭代 → 开发板上板 → 交叉编译 → 接入真实 LED 硬件与按键输入 → RS485 串口 C 应用 → systemd 服务部署 → logrotate 日志轮转 → 内核驱动/BSP 开发（VehicleSensorLab），学习计划持续进行中 🚀</sub>
 </p>
